@@ -1,0 +1,625 @@
+{
+  "version": "cn-0.1.0",
+  "seed": 892,
+  "rngCount": 279,
+  "name": {
+    "sei": "罗",
+    "mei": "梓萱"
+  },
+  "sex": "F",
+  "pref": "江西省",
+  "city": "九江",
+  "birthPref": "江西省",
+  "birthCity": "九江",
+  "born": {
+    "y": 2026,
+    "m": 10,
+    "d": 23,
+    "weight": 2.967877033376139,
+    "place": "县人民医院"
+  },
+  "year": 2050,
+  "age": 24,
+  "alive": true,
+  "era": "modern",
+  "rural": true,
+  "wealth": -0.40263473379924375,
+  "stats": {
+    "health": 79.72995059296856,
+    "happy": 76.4662405106684,
+    "know": 36.57641346921739,
+    "social": 59.00469723096821
+  },
+  "fam": {
+    "father": {
+      "name": "勇",
+      "age0": 27,
+      "alive": true,
+      "job": {
+        "title": "企业职员"
+      }
+    },
+    "mother": {
+      "name": "秀兰",
+      "age0": 31,
+      "alive": true,
+      "job": {
+        "title": "社区工作人员"
+      }
+    },
+    "parentHH": 59160,
+    "home": "乡镇自建房",
+    "siblings": []
+  },
+  "edu": {
+    "stage": "work",
+    "label": "技能学习",
+    "school": "技能培训"
+  },
+  "eduDone": "高中及以下",
+  "job": {
+    "title": "餐饮服务",
+    "kind": "basic"
+  },
+  "jobHist": [
+    {
+      "age": 18,
+      "title": "餐饮服务",
+      "income": 28109
+    }
+  ],
+  "income": 27583,
+  "savings": 79567,
+  "debt": 0,
+  "focus": "平衡",
+  "flags": {
+    "earlySkill": true,
+    "gradAge": 18,
+    "jobType": "basic"
+  },
+  "done": {
+    "interest": true,
+    "zhongkao": true,
+    "further": true,
+    "jobEntry": true
+  },
+  "log": [
+    {
+      "age": 0,
+      "year": 2026,
+      "c": "birth",
+      "t": "2026 年 10 月 23 日，你出生在江西省九江附近的一个乡镇。女孩，2.97 公斤。",
+      "tone": "good",
+      "note": "地区抽样按第七次人口普查的各省常住人口加权；城市、城乡和家庭情况为游戏抽样。"
+    },
+    {
+      "age": 0,
+      "year": 2026,
+      "c": "family",
+      "t": "你和父母住在乡镇自建房里。这个家庭的年收入约为5.9万元。",
+      "tone": "neutral",
+      "note": "家庭收入由全国人均可支配收入和游戏设定的家庭人数、地区系数及随机差异生成，不是该省的官方收入。"
+    },
+    {
+      "age": 1,
+      "year": 2027,
+      "c": "family",
+      "t": "家人给你拍了一张照片，还认真地写下了日期。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 2,
+      "year": 2028,
+      "c": "family",
+      "t": "家人把你照顾得妥妥当当，也慢慢学会了读懂你的表情。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 3,
+      "year": 2029,
+      "c": "school",
+      "t": "你进入幼儿园。第一次和家人分别时有点不舍，后来慢慢交到了朋友。",
+      "tone": "good",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 3,
+      "year": 2029,
+      "c": "family",
+      "t": "春节时，家人抱着你在窗边看烟花。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 4,
+      "year": 2030,
+      "c": "family",
+      "t": "你有了一件走到哪里都要带着的小玩具。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 5,
+      "year": 2031,
+      "c": "family",
+      "t": "你和家人在小区里转了一圈，在一棵大树旁停了下来。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 6,
+      "year": 2032,
+      "c": "school",
+      "t": "你背着新书包走进小学，开始了自己的学生时代。",
+      "tone": "good",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 6,
+      "year": 2032,
+      "c": "story",
+      "t": "你在课间和同学玩游戏，直到上课铃响才跑回教室。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 7,
+      "year": 2033,
+      "c": "story",
+      "t": "你在班级活动里完成了自己的任务，有人认真地夸了你。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 8,
+      "year": 2034,
+      "c": "story",
+      "t": "你和朋友约好，长大以后也要经常见面。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 9,
+      "year": 2035,
+      "c": "story",
+      "t": "你背着书包回家，路过的小店飘出烤红薯的香味。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 10,
+      "year": 2036,
+      "c": "choice",
+      "t": "你开始学一门艺术。第一次完成作品时，家人认真地看了很久。",
+      "tone": "choice",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 11,
+      "year": 2037,
+      "c": "story",
+      "t": "中秋节，大家把月饼切成小块，坐在一起聊家常。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 12,
+      "year": 2038,
+      "c": "school",
+      "t": "你进入初中，科目变多了，也开始有自己的小秘密。",
+      "tone": "good",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 12,
+      "year": 2038,
+      "c": "story",
+      "t": "家人带你坐了一次高铁，你看了一路的田野和房子。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 13,
+      "year": 2039,
+      "c": "story",
+      "t": "你在旧书里发现一张很久以前写下的纸条。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 14,
+      "year": 2040,
+      "c": "story",
+      "t": "毕业合照里，大家笑得有点拘谨，又有点舍不得。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 15,
+      "year": 2041,
+      "c": "story",
+      "t": "一次考试没有发挥好，老师和你一起分析了错题。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 15,
+      "year": 2041,
+      "c": "choice",
+      "t": "你开始学习一门手艺。未来还很长，你准备先找到自己的立足点。",
+      "tone": "choice",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 16,
+      "year": 2042,
+      "c": "story",
+      "t": "运动会那天，你为朋友喊到嗓子都哑了。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 17,
+      "year": 2043,
+      "c": "story",
+      "t": "晚自习结束，你和同学一边走一边聊未来。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 18,
+      "year": 2044,
+      "c": "story",
+      "t": "你第一次觉得，有些烦恼不一定能马上告诉家人。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 18,
+      "year": 2044,
+      "c": "choice",
+      "t": "你决定先就业。第一次自己写简历时，你在“工作经验”那一栏停了很久。",
+      "tone": "choice",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 18,
+      "year": 2044,
+      "c": "work",
+      "t": "你成为一名餐饮服务，第一年的收入约为2.8万元。",
+      "tone": "good",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 18,
+      "year": 2044,
+      "c": "choice",
+      "t": "第一次上班，你比约定时间早到了半小时。",
+      "tone": "choice",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 20,
+      "year": 2046,
+      "c": "money",
+      "t": "这一年收入约2.8万元，生活与家庭开支约1.5万元。累计结余约2.6万元。",
+      "tone": "neutral",
+      "note": "金额为游戏中的人民币估算；未模拟真实税制、社保待遇和房贷合同。"
+    },
+    {
+      "age": 21,
+      "year": 2047,
+      "c": "story",
+      "t": "你学会了一道家常菜，拍照发进家庭群。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 22,
+      "year": 2048,
+      "c": "story",
+      "t": "你坐上去往另一座城市的高铁，开始一次短暂旅行。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 23,
+      "year": 2049,
+      "c": "story",
+      "t": "你和朋友在路边吃了一顿夜宵，聊到店家准备收摊。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 24,
+      "year": 2050,
+      "c": "story",
+      "t": "你给家人打电话，问起一件小时候总觉得普通的小事。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    }
+  ],
+  "snaps": [
+    {
+      "age": 0,
+      "health": 80,
+      "happy": 73,
+      "know": 3,
+      "social": 57,
+      "savings": 0,
+      "pref": "江西省"
+    },
+    {
+      "age": 1,
+      "health": 80,
+      "happy": 75,
+      "know": 3,
+      "social": 57,
+      "savings": 0,
+      "pref": "江西省"
+    },
+    {
+      "age": 2,
+      "health": 80,
+      "happy": 76,
+      "know": 3,
+      "social": 57,
+      "savings": 0,
+      "pref": "江西省"
+    },
+    {
+      "age": 3,
+      "health": 80,
+      "happy": 74,
+      "know": 3,
+      "social": 57,
+      "savings": 0,
+      "pref": "江西省"
+    },
+    {
+      "age": 4,
+      "health": 80,
+      "happy": 73,
+      "know": 3,
+      "social": 57,
+      "savings": 0,
+      "pref": "江西省"
+    },
+    {
+      "age": 5,
+      "health": 80,
+      "happy": 74,
+      "know": 3,
+      "social": 57,
+      "savings": 0,
+      "pref": "江西省"
+    },
+    {
+      "age": 6,
+      "health": 80,
+      "happy": 74,
+      "know": 6,
+      "social": 57,
+      "savings": 0,
+      "pref": "江西省"
+    },
+    {
+      "age": 7,
+      "health": 80,
+      "happy": 74,
+      "know": 10,
+      "social": 57,
+      "savings": 0,
+      "pref": "江西省"
+    },
+    {
+      "age": 8,
+      "health": 80,
+      "happy": 73,
+      "know": 12,
+      "social": 57,
+      "savings": 0,
+      "pref": "江西省"
+    },
+    {
+      "age": 9,
+      "health": 80,
+      "happy": 75,
+      "know": 14,
+      "social": 57,
+      "savings": 0,
+      "pref": "江西省"
+    },
+    {
+      "age": 10,
+      "health": 80,
+      "happy": 81,
+      "know": 19,
+      "social": 57,
+      "savings": 0,
+      "pref": "江西省"
+    },
+    {
+      "age": 11,
+      "health": 80,
+      "happy": 82,
+      "know": 21,
+      "social": 56,
+      "savings": 0,
+      "pref": "江西省"
+    },
+    {
+      "age": 12,
+      "health": 80,
+      "happy": 82,
+      "know": 24,
+      "social": 56,
+      "savings": 0,
+      "pref": "江西省"
+    },
+    {
+      "age": 13,
+      "health": 80,
+      "happy": 82,
+      "know": 27,
+      "social": 56,
+      "savings": 0,
+      "pref": "江西省"
+    },
+    {
+      "age": 14,
+      "health": 80,
+      "happy": 80,
+      "know": 30,
+      "social": 56,
+      "savings": 0,
+      "pref": "江西省"
+    },
+    {
+      "age": 15,
+      "health": 80,
+      "happy": 80,
+      "know": 32,
+      "social": 56,
+      "savings": 0,
+      "pref": "江西省"
+    },
+    {
+      "age": 16,
+      "health": 80,
+      "happy": 80,
+      "know": 34,
+      "social": 56,
+      "savings": 0,
+      "pref": "江西省"
+    },
+    {
+      "age": 17,
+      "health": 80,
+      "happy": 82,
+      "know": 37,
+      "social": 56,
+      "savings": 0,
+      "pref": "江西省"
+    },
+    {
+      "age": 18,
+      "health": 80,
+      "happy": 81,
+      "know": 37,
+      "social": 60,
+      "savings": 0,
+      "pref": "江西省"
+    },
+    {
+      "age": 19,
+      "health": 80,
+      "happy": 80,
+      "know": 37,
+      "social": 60,
+      "savings": 13137,
+      "pref": "江西省"
+    },
+    {
+      "age": 20,
+      "health": 80,
+      "happy": 79,
+      "know": 37,
+      "social": 60,
+      "savings": 26228,
+      "pref": "江西省"
+    },
+    {
+      "age": 21,
+      "health": 80,
+      "happy": 80,
+      "know": 37,
+      "social": 60,
+      "savings": 39786,
+      "pref": "江西省"
+    },
+    {
+      "age": 22,
+      "health": 80,
+      "happy": 78,
+      "know": 37,
+      "social": 59,
+      "savings": 53309,
+      "pref": "江西省"
+    },
+    {
+      "age": 23,
+      "health": 80,
+      "happy": 77,
+      "know": 37,
+      "social": 59,
+      "savings": 66603,
+      "pref": "江西省"
+    },
+    {
+      "age": 24,
+      "health": 80,
+      "happy": 76,
+      "know": 37,
+      "social": 59,
+      "savings": 79567,
+      "pref": "江西省"
+    }
+  ],
+  "notes": [
+    {
+      "age": 24,
+      "t": "旧版本存档兼容验证"
+    }
+  ],
+  "kids": [],
+  "spouse": null,
+  "partner": null,
+  "retired": false,
+  "house": null,
+  "healthCondition": null,
+  "hobbies": [
+    "艺术"
+  ],
+  "peak": {
+    "income": 28846,
+    "savings": 79567
+  },
+  "nisa": 0,
+  "choices": [
+    {
+      "age": 10,
+      "id": "interest",
+      "option": 2,
+      "label": "学画画或音乐"
+    },
+    {
+      "age": 15,
+      "id": "zhongkao",
+      "option": 2,
+      "label": "暂缓升学，先学技能"
+    },
+    {
+      "age": 18,
+      "id": "further",
+      "option": 2,
+      "label": "直接找一份工作"
+    },
+    {
+      "age": 18,
+      "id": "jobEntry",
+      "option": 0,
+      "label": "找一份专业相关的工作"
+    }
+  ],
+  "trail": [
+    {
+      "age": 0,
+      "pref": "江西省",
+      "city": "九江"
+    }
+  ],
+  "started": true
+}

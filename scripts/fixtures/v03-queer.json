@@ -1,0 +1,892 @@
+{
+  "version": "cn-0.3.0",
+  "seed": 36,
+  "rngCount": 366,
+  "name": {
+    "sei": "杜",
+    "mei": "承安"
+  },
+  "sex": "M",
+  "pref": "甘肃省",
+  "city": "酒泉",
+  "birthPref": "甘肃省",
+  "birthCity": "酒泉",
+  "born": {
+    "y": 2026,
+    "m": 10,
+    "d": 23,
+    "weight": 3.2105728508414595,
+    "place": "县人民医院"
+  },
+  "year": 2056,
+  "age": 30,
+  "alive": true,
+  "era": "modern",
+  "rural": true,
+  "wealth": 0.49265109041329747,
+  "stats": {
+    "health": 80.3274756405276,
+    "happy": 83.82423762855514,
+    "know": 35.78511259054131,
+    "social": 63.428174122468086
+  },
+  "fam": {
+    "father": {
+      "name": "阳",
+      "age0": 36,
+      "alive": true,
+      "job": {
+        "title": "物流从业者"
+      },
+      "sei": "杜"
+    },
+    "mother": {
+      "name": "晓雨",
+      "age0": 34,
+      "alive": true,
+      "job": {
+        "title": "医护人员"
+      },
+      "sei": "王"
+    },
+    "parentHH": 124380,
+    "home": "乡镇自建房",
+    "siblings": [
+      {
+        "name": "宇航",
+        "age": 3,
+        "sei": "杜"
+      }
+    ]
+  },
+  "edu": {
+    "stage": "work",
+    "label": "中等职业学校",
+    "school": "酒泉某职业学校"
+  },
+  "eduDone": "高中及以下",
+  "job": {
+    "title": "基层公共服务岗位",
+    "kind": "college",
+    "sector": "civil"
+  },
+  "jobHist": [
+    {
+      "age": 18,
+      "title": "数控技术员",
+      "income": 37661
+    },
+    {
+      "age": 24,
+      "title": "技术服务接单者",
+      "income": 39723
+    }
+  ],
+  "income": 50414,
+  "savings": 2000000,
+  "debt": 0,
+  "focus": "平衡",
+  "flags": {
+    "livesWithParents": true,
+    "gradAge": 18,
+    "jobType": "basic",
+    "workStyle": "灵活就业",
+    "flexible": true
+  },
+  "done": {
+    "schoolLife": true,
+    "interest": true,
+    "zhongkao": true,
+    "queerCrush": true,
+    "further": true,
+    "jobEntry": true,
+    "workStyle": true,
+    "social": true
+  },
+  "log": [
+    {
+      "age": 0,
+      "year": 2026,
+      "c": "birth",
+      "t": "2026 年 10 月 23 日，你出生在甘肃省酒泉市附近的一个乡镇。男孩，3.21 公斤。",
+      "tone": "good",
+      "note": "地区抽样按第七次人口普查的各省常住人口加权；城市、城乡和家庭情况为游戏抽样。"
+    },
+    {
+      "age": 0,
+      "year": 2026,
+      "c": "family",
+      "t": "你和父母住在乡镇自建房里。这个家庭的年收入约为12.4万元。",
+      "tone": "neutral",
+      "note": "家庭收入由全国人均可支配收入和游戏设定的家庭人数、地区系数及随机差异生成，不是该省的官方收入。"
+    },
+    {
+      "age": 1,
+      "year": 2027,
+      "c": "family",
+      "t": "周岁那天，家人给你拍了一张全家福。你还不明白什么是生日，只觉得今天很热闹。",
+      "tone": "good",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 1,
+      "year": 2027,
+      "c": "family",
+      "t": "你和家人在小区里转了一圈，在一棵大树旁停了下来。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 2,
+      "year": 2028,
+      "c": "family",
+      "t": "家人把你照顾得妥妥当当，也慢慢学会了读懂你的表情。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 3,
+      "year": 2029,
+      "c": "school",
+      "t": "你进入幼儿园。第一次和家人分别时有点不舍，后来慢慢交到了朋友。",
+      "tone": "good",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 3,
+      "year": 2029,
+      "c": "family",
+      "t": "春节时，家人抱着你在窗边看街上的灯光。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 4,
+      "year": 2030,
+      "c": "family",
+      "t": "家人给你拍了一张照片，还认真地写下了日期。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 5,
+      "year": 2031,
+      "c": "family",
+      "t": "你有了一件走到哪里都要带着的小玩具。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 6,
+      "year": 2032,
+      "c": "school",
+      "t": "你背着新书包走进小学，开始了自己的学生时代。",
+      "tone": "good",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 6,
+      "year": 2032,
+      "c": "story",
+      "t": "中秋节，大家把月饼切成小块，坐在一起聊家常。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 7,
+      "year": 2033,
+      "c": "story",
+      "t": "放假的早晨，你和家人去了早起营业的牛肉面馆。一碗牛肉面端上来时，你觉得这就是熟悉的生活。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 8,
+      "year": 2034,
+      "c": "story",
+      "t": "你在班级活动里完成了自己的任务，有人认真地夸了你。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 8,
+      "year": 2034,
+      "c": "choice",
+      "t": "你交出了一份有点笨拙、却完全属于自己的小作品。老师把它贴在了教室后墙。",
+      "tone": "choice",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 10,
+      "year": 2036,
+      "c": "story",
+      "t": "你在课间和同学玩游戏，直到上课铃响才跑回教室。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 10,
+      "year": 2036,
+      "c": "choice",
+      "t": "你加入了学校的运动社团。操场上多了几位会叫你名字的朋友。",
+      "tone": "choice",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 11,
+      "year": 2037,
+      "c": "story",
+      "t": "你背着书包回家，路过的小店飘出烤红薯的香味。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 12,
+      "year": 2038,
+      "c": "school",
+      "t": "你进入初中，科目变多了，也开始有自己的小秘密。",
+      "tone": "good",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 12,
+      "year": 2038,
+      "c": "story",
+      "t": "一个下雨的放学日，你看见家人撑着伞站在校门口。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 13,
+      "year": 2039,
+      "c": "story",
+      "t": "你在夜里听完一张专辑，好像有人说出了你的心事。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 14,
+      "year": 2040,
+      "c": "story",
+      "t": "放假的早晨，你和家人去了早起营业的牛肉面馆。一碗牛肉面端上来时，你觉得这就是熟悉的生活。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 15,
+      "year": 2041,
+      "c": "family",
+      "t": "家里的杜宇航也成年了。饭桌上，你们开始聊起各自的打算。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 15,
+      "year": 2041,
+      "c": "choice",
+      "t": "没有被理想的高中录取。你进入了一所职业学校，决定先学好一门技术。",
+      "tone": "choice",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 16,
+      "year": 2042,
+      "c": "school",
+      "t": "实训课上，你第一次独立完成了一道工序。老师说，认真做事也是一种本事。",
+      "tone": "good",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 16,
+      "year": 2042,
+      "c": "story",
+      "t": "你第一次觉得，有些烦恼不一定能马上告诉家人。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 16,
+      "year": 2042,
+      "c": "choice",
+      "t": "你在日记里写下了这个秘密。喜欢一个人，本来就可以是一件很轻很普通的事。",
+      "tone": "choice",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 18,
+      "year": 2044,
+      "c": "money",
+      "t": "2044 年的家庭账本：到账约0元，生活和还款约6,240元。本年收支缺口约6,240元。",
+      "tone": "neutral",
+      "note": "薪酬扣除、伴侣共同生活投入、租金、学费、照护和借款均为游戏估算，不对应真实政策或金融合同。"
+    },
+    {
+      "age": 18,
+      "year": 2044,
+      "c": "story",
+      "t": "毕业合照里，大家笑得有点拘谨，又有点舍不得。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 18,
+      "year": 2044,
+      "c": "choice",
+      "t": "你决定先就业。第一次自己写简历时，你在“工作经验”那一栏停了很久。",
+      "tone": "choice",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 18,
+      "year": 2044,
+      "c": "work",
+      "t": "你成为一名数控技术员，第一年的收入约为3.8万元。",
+      "tone": "good",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 18,
+      "year": 2044,
+      "c": "choice",
+      "t": "你留在了熟悉的城市。晚饭时，家里又多了一双筷子。",
+      "tone": "choice",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 19,
+      "year": 2045,
+      "c": "story",
+      "t": "你第一次自己交水电费，忽然有了一点长大的实感。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 20,
+      "year": 2046,
+      "c": "money",
+      "t": "2046 年的家庭账本：到账约2.7万元，生活和还款约6,240元。本年结余约2.1万元。",
+      "tone": "neutral",
+      "note": "薪酬扣除、伴侣共同生活投入、租金、学费、照护和借款均为游戏估算，不对应真实政策或金融合同。"
+    },
+    {
+      "age": 20,
+      "year": 2046,
+      "c": "story",
+      "t": "你在手机上抢到了回家的车票。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 22,
+      "year": 2048,
+      "c": "story",
+      "t": "你学会了一道家常菜，拍照发进家庭群。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 24,
+      "year": 2050,
+      "c": "story",
+      "t": "一个想家的晚上，你忽然想吃一碗牛肉面。记忆里还有清晨街头的热气。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 24,
+      "year": 2050,
+      "c": "story",
+      "t": "下班后的路上，你顺手买了点菜。到家开灯的那一刻，忙碌的一天慢慢落下来了。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 24,
+      "year": 2050,
+      "c": "choice",
+      "t": "你开始自己接单或经营一门小生意。有人催进度，也有人记得给你介绍新的机会。",
+      "tone": "choice",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 25,
+      "year": 2051,
+      "c": "money",
+      "t": "2051 年的家庭账本：到账约3.8万元，生活和还款约6,240元。本年结余约3.2万元。",
+      "tone": "neutral",
+      "note": "薪酬扣除、伴侣共同生活投入、租金、学费、照护和借款均为游戏估算，不对应真实政策或金融合同。"
+    },
+    {
+      "age": 25,
+      "year": 2051,
+      "c": "story",
+      "t": "你坐上去往另一座城市的高铁，开始一次短暂旅行。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 25,
+      "year": 2051,
+      "c": "choice",
+      "t": "你开始安排自己的周末，去徒步、看展，也学着好好做一顿饭。",
+      "tone": "choice",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 26,
+      "year": 2052,
+      "c": "story",
+      "t": "你第一次自己交水电费，忽然有了一点长大的实感。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 27,
+      "year": 2053,
+      "c": "money",
+      "t": "计划外的支出让你花了2,165元，你重新调整了这一年的预算。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 27,
+      "year": 2053,
+      "c": "story",
+      "t": "你在手机上抢到了回家的车票。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 28,
+      "year": 2054,
+      "c": "story",
+      "t": "放假的早晨，你和家人去了早起营业的牛肉面馆。一碗牛肉面端上来时，你觉得这就是熟悉的生活。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 29,
+      "year": 2055,
+      "c": "story",
+      "t": "你和朋友在路边吃了一顿夜宵，聊到店家准备收摊。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    },
+    {
+      "age": 30,
+      "year": 2056,
+      "c": "money",
+      "t": "2056 年的家庭账本：到账约4.2万元，生活和还款约6,240元。本年结余约3.6万元。",
+      "tone": "neutral",
+      "note": "薪酬扣除、伴侣共同生活投入、租金、学费、照护和借款均为游戏估算，不对应真实政策或金融合同。"
+    },
+    {
+      "age": 30,
+      "year": 2056,
+      "c": "story",
+      "t": "你接到一位老客户的新订单。忙完以后，你给自己留了半天休息。",
+      "tone": "neutral",
+      "note": "游戏情节；事件概率为当前版本的模型参数。"
+    }
+  ],
+  "snaps": [
+    {
+      "age": 0,
+      "health": 74,
+      "happy": 84,
+      "know": 3,
+      "social": 53,
+      "savings": 0,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 1,
+      "health": 74,
+      "happy": 83,
+      "know": 3,
+      "social": 53,
+      "savings": 0,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 2,
+      "health": 74,
+      "happy": 83,
+      "know": 3,
+      "social": 53,
+      "savings": 0,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 3,
+      "health": 74,
+      "happy": 82,
+      "know": 3,
+      "social": 53,
+      "savings": 0,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 4,
+      "health": 74,
+      "happy": 82,
+      "know": 3,
+      "social": 53,
+      "savings": 0,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 5,
+      "health": 74,
+      "happy": 82,
+      "know": 3,
+      "social": 53,
+      "savings": 0,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 6,
+      "health": 74,
+      "happy": 79,
+      "know": 5,
+      "social": 53,
+      "savings": 0,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 7,
+      "health": 74,
+      "happy": 80,
+      "know": 8,
+      "social": 53,
+      "savings": 0,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 8,
+      "health": 74,
+      "happy": 84,
+      "know": 13,
+      "social": 53,
+      "savings": 0,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 9,
+      "health": 74,
+      "happy": 80,
+      "know": 15,
+      "social": 53,
+      "savings": 0,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 10,
+      "health": 80,
+      "happy": 82,
+      "know": 17,
+      "social": 57,
+      "savings": 0,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 11,
+      "health": 80,
+      "happy": 82,
+      "know": 19,
+      "social": 57,
+      "savings": 0,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 12,
+      "health": 80,
+      "happy": 83,
+      "know": 22,
+      "social": 57,
+      "savings": 0,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 13,
+      "health": 80,
+      "happy": 83,
+      "know": 24,
+      "social": 57,
+      "savings": 0,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 14,
+      "health": 80,
+      "happy": 81,
+      "know": 28,
+      "social": 57,
+      "savings": 0,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 15,
+      "health": 80,
+      "happy": 81,
+      "know": 32,
+      "social": 57,
+      "savings": 0,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 16,
+      "health": 80,
+      "happy": 85,
+      "know": 34,
+      "social": 57,
+      "savings": 0,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 17,
+      "health": 80,
+      "happy": 85,
+      "know": 36,
+      "social": 57,
+      "savings": 0,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 18,
+      "health": 80,
+      "happy": 84,
+      "know": 36,
+      "social": 69,
+      "savings": -6240,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 19,
+      "health": 80,
+      "happy": 85,
+      "know": 36,
+      "social": 68,
+      "savings": 13986,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 20,
+      "health": 80,
+      "happy": 88,
+      "know": 36,
+      "social": 68,
+      "savings": 35032,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 21,
+      "health": 80,
+      "happy": 87,
+      "know": 36,
+      "social": 67,
+      "savings": 55807,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 22,
+      "health": 80,
+      "happy": 86,
+      "know": 36,
+      "social": 67,
+      "savings": 77202,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 23,
+      "health": 80,
+      "happy": 85,
+      "know": 36,
+      "social": 66,
+      "savings": 99251,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 24,
+      "health": 80,
+      "happy": 82,
+      "know": 36,
+      "social": 66,
+      "savings": 122803,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 25,
+      "health": 80,
+      "happy": 88,
+      "know": 36,
+      "social": 65,
+      "savings": 154563,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 26,
+      "health": 80,
+      "happy": 87,
+      "know": 36,
+      "social": 65,
+      "savings": 202308,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 27,
+      "health": 80,
+      "happy": 87,
+      "know": 36,
+      "social": 65,
+      "savings": 234753,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 28,
+      "health": 80,
+      "happy": 86,
+      "know": 36,
+      "social": 64,
+      "savings": 272131,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 29,
+      "health": 80,
+      "happy": 86,
+      "know": 36,
+      "social": 64,
+      "savings": 310136,
+      "pref": "甘肃省"
+    },
+    {
+      "age": 30,
+      "health": 80,
+      "happy": 84,
+      "know": 36,
+      "social": 63,
+      "savings": 346244,
+      "pref": "甘肃省"
+    }
+  ],
+  "notes": [],
+  "kids": [],
+  "spouse": null,
+  "partner": null,
+  "retired": false,
+  "house": null,
+  "healthCondition": null,
+  "hobbies": [
+    "运动",
+    "旅行"
+  ],
+  "peak": {
+    "income": 64267,
+    "savings": 346244
+  },
+  "nisa": 0,
+  "choices": [
+    {
+      "age": 8,
+      "id": "schoolLife",
+      "option": 1,
+      "label": "认真完成自己的小作品"
+    },
+    {
+      "age": 10,
+      "id": "interest",
+      "option": 0,
+      "label": "参加运动社团"
+    },
+    {
+      "age": 15,
+      "id": "zhongkao",
+      "option": 0,
+      "label": "争取普通高中"
+    },
+    {
+      "age": 16,
+      "id": "queerCrush",
+      "option": 0,
+      "label": "先把喜欢写进自己的日记"
+    },
+    {
+      "age": 18,
+      "id": "further",
+      "option": 2,
+      "label": "直接找一份工作"
+    },
+    {
+      "age": 18,
+      "id": "jobEntry",
+      "option": 1,
+      "label": "找一份离家近的工作"
+    },
+    {
+      "age": 24,
+      "id": "workStyle",
+      "option": 2,
+      "label": "尝试接单或做小生意"
+    },
+    {
+      "age": 25,
+      "id": "social",
+      "option": 1,
+      "label": "把时间留给自己"
+    }
+  ],
+  "trail": [
+    {
+      "age": 0,
+      "pref": "甘肃省",
+      "city": "酒泉"
+    }
+  ],
+  "actions": [],
+  "finances": {
+    "year": 2056,
+    "gross": 50414,
+    "pay": 42348,
+    "spousePay": 0,
+    "support": 0,
+    "daily": 6240,
+    "rent": 0,
+    "children": 0,
+    "care": 0,
+    "tuition": 0,
+    "mortgagePay": 0,
+    "principal": 0,
+    "interest": 0,
+    "studentPay": 0,
+    "loanFunding": 0,
+    "rentalIncome": 0,
+    "propertyCost": 0,
+    "carCost": 0,
+    "valueChange": 0,
+    "expense": 6240,
+    "balance": 36108,
+    "model": true,
+    "other": 0
+  },
+  "origin": {
+    "settlement": "乡镇",
+    "family": "普通的工薪家庭"
+  },
+  "studentDebt": 0,
+  "careerYears": 12,
+  "careerIncome": 514567.23938767205,
+  "properties": [],
+  "assetSerial": 0,
+  "assetHistory": [],
+  "car": null,
+  "mortgage": null,
+  "queer": {
+    "enabled": true,
+    "type": "self",
+    "orientation": "gay",
+    "out": {},
+    "pending": null
+  },
+  "started": true
+}

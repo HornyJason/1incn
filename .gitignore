@@ -1,0 +1,6 @@
+# Local preview and visual-regression output
+screenshots/
+tests/output/
+
+# Editor and operating-system files
+.DS_Store
