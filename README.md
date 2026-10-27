@@ -1,5 +1,9 @@
 # 十四亿分之一：中国模式 0.4 交互更新
 
+[在线游玩](https://hornyjason.github.io/1incn/) · [源码仓库](https://github.com/HornyJason/1incn)
+
+通过 GitHub Pages 发布，手机和电脑浏览器均可直接打开。存档保存在各自浏览器中；从本地预览迁移时，先导出 JSON，再在在线版首页导入。
+
 在 [satorunet/1injp](https://github.com/satorunet/1injp) 源码基础上扩展的现代中国人生模拟器。沿用原作的配色、像素人物、插图和种子随机数，静态运行，无构建步骤、登录或运行时 AI 接口。
 
 ```sh
