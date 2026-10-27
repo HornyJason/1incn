@@ -1,6 +1,7 @@
 /* 房产与车辆：游戏经济，不对应真实报价。现金、借款和资产市值分别记账。 */
 (function(G){
   const cap=(v,a,b)=>Math.max(a,Math.min(b,v)), money=n=>G.CNEngine.money(n);
+  const homes={small:{name:'普通两居',factor:1},family:{name:'改善型三居',factor:1.55},flat:{name:'大平层',factor:2.6},villa:{name:'别墅',factor:4.5}};
   const cars=[{id:'used',name:'二手代步车',price:40000},{id:'compact',name:'经济型新车',price:90000},{id:'family',name:'家庭用车',price:160000}];
   function sync(l){
     const home=l.properties.find(p=>p.use==='self'&&p.pref===l.pref&&p.city===l.city);
@@ -17,12 +18,12 @@
     sync(l);return l;
   }
   function quote(l,size='small',mode='loan'){
-    const price=Math.round(G.CNLocal.cityProfile(l).homePrice*(size==='family'?1.55:1));
+    const price=Math.round(G.CNLocal.cityProfile(l).homePrice*(homes[size]?.factor||1));
     const years=Math.min(25,80-l.age),down=mode==='cash'?price:Math.round(price*.3),balance=price-down,rate=.035;
     const annualPayment=balance&&years>0?Math.round(balance*rate/(1-Math.pow(1+rate,-years))):0;
     return {price,down,fees:Math.round(price*.02),balance,rate,years,annualPayment};
   }
-  function options(l){normalize(l);return {houses:['small','family'].map(size=>({size,name:size==='small'?'普通两居':'改善型三居',cash:quote(l,size,'cash'),loan:quote(l,size,'loan')})),cars};}
+  function options(l){normalize(l);return {houses:Object.keys(homes).map(size=>({size,name:homes[size].name,cash:quote(l,size,'cash'),loan:quote(l,size,'loan')})),cars};}
   function record(l,kind,text,delta,log){
     l.assetHistory.push({age:l.age,year:l.year,kind,text,delta});l.savings=Math.round(l.savings+delta);
     if(l.finances?.year===l.year){const f=l.finances;if(delta<0){f.assetOut=(f.assetOut||0)-delta;f.expense-=delta;}else f.assetIn=(f.assetIn||0)+delta;f.balance+=delta;}
@@ -33,12 +34,12 @@
     const fail=message=>({ok:false,message});
     if(action==='buyHome'){
       if(l.properties.length>=5)return fail('最多同时持有 5 套房产。');
-      if(!['small','family'].includes(args.size)||!['cash','loan'].includes(args.mode)||!['self','rent'].includes(args.use))return fail('请选择有效的购房方案。');
+      if(!Object.hasOwn(homes,args.size)||!['cash','loan'].includes(args.mode)||!['self','rent'].includes(args.use))return fail('请选择有效的购房方案。');
       const q=quote(l,args.size,args.mode);if(args.mode==='loan'&&q.years<5)return fail('该年龄仅支持全款购房。');
       if(l.savings<q.down+q.fees)return fail('结余不足以支付房款和手续费。');
       if(args.use==='self')l.properties.filter(p=>p.use==='self').forEach(p=>p.use='vacant');
-      const p={id:'home-'+(++l.assetSerial),name:args.size==='small'?'普通两居':'改善型三居',value:q.price,purchasePrice:q.price,purchaseYear:l.year,pref:l.pref,city:l.city,rural:l.rural,use:args.use,loan:q.balance?{balance:q.balance,rate:q.rate,yearsLeft:q.years,annualPayment:q.annualPayment}:null};
-      l.properties.push(p);l.done.housing=true;if(args.use==='self')l.flags.livesWithParents=false;
+      const p={id:'home-'+(++l.assetSerial),name:homes[args.size].name,value:q.price,purchasePrice:q.price,purchaseYear:l.year,pref:l.pref,city:l.city,rural:l.rural,use:args.use,loan:q.balance?{balance:q.balance,rate:q.rate,yearsLeft:q.years,annualPayment:q.annualPayment}:null};
+      l.properties.push(p);l.done.housing=true;if(args.use==='self'){l.flags.livesWithParents=false;delete l.flags.livingWithChild;}
       record(l,'buyHome',`你在${l.city}买下一套${p.name}，用作${args.use==='self'?'自住':'出租'}。支付${money(q.down)}房款和${money(q.fees)}手续费${q.balance?'，剩余房款分期偿还':''}。`,-q.down-q.fees,log);
     }else if(action==='sellHome'){
       const p=l.properties.find(p=>p.id===args.id);if(!p)return fail('这套房产已经不在名下。');
@@ -50,6 +51,7 @@
       const p=l.properties.find(p=>p.id===args.id);if(!p||!['self','rent','vacant'].includes(args.use))return fail('无法更改这套房产的用途。');
       if(p.use===args.use)return fail('这套房产已经是该用途。');
       if(args.use==='self'){
+        delete l.flags.livingWithChild;
         l.properties.filter(x=>x.use==='self').forEach(x=>x.use='vacant');
         if(l.pref!==p.pref||l.city!==p.city){l.pref=p.pref;l.city=p.city;l.rural=p.rural;l.trail.push({age:l.age,pref:p.pref,city:p.city});}
         l.flags.livesWithParents=false;
@@ -82,6 +84,14 @@
     let carCost=0;if(l.car){carCost=Math.round(3000+l.car.purchasePrice*.025);l.car.value=Math.max(Math.round(l.car.purchasePrice*.05),Math.round(l.car.value*.85));}
     sync(l);return {rentalIncome,propertyCost,carCost,principal,interest,mortgagePay:principal+interest,valueChange};
   }
-  function totals(l){normalize(l);const propertyValue=l.properties.reduce((s,p)=>s+p.value,0),carValue=l.car?.value||0;return {propertyValue,carValue,debt:l.debt,netWorth:Math.round(l.savings+propertyValue+carValue-l.debt)};}
-  G.CNAssets={normalize,sync,quote,options,transact,year,totals,cars};
+  function totals(l){normalize(l);const propertyValue=l.properties.reduce((s,p)=>s+p.value,0),carValue=l.car?.value||0;return {propertyValue,carValue,debt:l.debt,investmentValue:G.CNFinance.value(l),netWorth:Math.round(l.savings+propertyValue+carValue+G.CNFinance.value(l)-l.debt)};}
+  function clearAffordableDebt(l,log){
+    normalize(l);const amount=l.debt;if(!l.alive||l.age<18||amount<=0||l.savings<amount)return false;
+    const student=l.studentDebt||0,housing=amount-student;l.savings-=amount;l.studentDebt=0;
+    for(const loan of [...l.properties.map(p=>p.loan),l.legacyMortgage].filter(Boolean)){loan.balance=0;loan.annualPayment=0;loan.yearsLeft=0;}
+    if(l.finances?.year===l.year){const f=l.finances;f.principal=(f.principal||0)+housing;f.mortgagePay=(f.mortgagePay||0)+housing;f.studentPay=(f.studentPay||0)+student;f.earlyRepayment=(f.earlyRepayment||0)+amount;f.expense+=amount;f.balance-=amount;}
+    const text=`积蓄足以覆盖剩余借款，你一次还清了 ${money(amount)}${student&&housing?' 的教育与住房借款':student?' 的教育借款':' 的住房借款'}。`;
+    l.assetHistory.push({age:l.age,year:l.year,kind:'repayDebt',text,delta:-amount});log(l,'money',text,'good');sync(l);return true;
+  }
+  G.CNAssets={normalize,sync,quote,options,transact,year,totals,cars,clearAffordableDebt};
 })(typeof window!=='undefined'?window:globalThis);

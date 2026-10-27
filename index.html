@@ -8,7 +8,7 @@
 <meta name="description" content="随机出生在中国的一个家庭，从童年、升学、工作到晚年，体验另一种人生。基于 1injp 的开源中国模式。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23c0392b'/%3E%3Ctext x='20' y='29' text-anchor='middle' fill='white' font-size='30'%3E1%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="cn.css?v=0.6.0">
+<link rel="stylesheet" href="cn.css?v=0.7.0">
 </head>
 <body>
 <header class="top">
@@ -39,7 +39,7 @@
         <button class="cta" id="btnBorn">出生</button>
       </div>
       <p id="resumeInfo" class="small muted" hidden></p><div class="cn-home-links"><button class="cn-link" id="btnImport">导入人生记录</button><span>·</span><button class="cn-link" data-go="past">翻翻我的人生簿</button></div>
-      <p class="cn-meta">中国模式 0.6 · 浏览器自动保存 · <button class="cn-link" data-go="data">数据说明</button></p>
+      <p class="cn-meta">中国模式 0.7 · 浏览器自动保存 · <button class="cn-link" data-go="data">数据说明</button></p>
       <p class="warn">虚构人生包含疾病、离别与死亡，适合 15 岁及以上体验。<br>地区按人口抽样；人生事件和概率含游戏设定。</p>
     </div>
   </section>
@@ -115,7 +115,7 @@
   <section id="past" class="view" aria-label="过去的人生"><div id="pastBody" class="doc"></div></section>
 </main>
 <footer class="foot">
-  <span>十四亿分之一 · 中国模式 0.6</span><br>
+  <span>十四亿分之一 · 中国模式 0.7</span><br>
   基于 <a href="https://github.com/satorunet/1injp" target="_blank" rel="noopener">satorunet / 1injp</a>（MIT）改编，保留原项目的视觉样式、像素人物和随机数实现。<br>
   灵感来自 <a href="https://1in8b.life" target="_blank" rel="noopener">1in8b.life</a> · <a href="https://github.com/HornyJason/1incn" target="_blank" rel="noopener">中国版源码</a> · <a href="#data" data-go="data">数据来源</a>
 </footer>
@@ -123,13 +123,14 @@
 <dialog id="modal" class="modal" aria-labelledby="mTitle"><div class="sheet"><button type="button" class="mclose" id="mHold" aria-label="暂时收起，稍后决定">×</button><p id="mAge" class="eyebrow"></p><h3 id="mTitle"></h3><p id="mText"></p><div id="mOpts" class="mopts"></div><div id="mNote" class="mnote"></div><div id="mPhone" class="mphone"></div><button type="button" id="choiceLater" class="mhold">稍后决定</button></div></dialog>
 <dialog id="correspondenceDialog" class="sheet" aria-labelledby="correspondenceTitle"><button type="button" class="mclose" id="correspondenceClose" aria-label="关闭书信文书">×</button><p class="eyebrow">留在这一生里的纸页和消息</p><h3 id="correspondenceTitle">书信与文书</h3><p class="small muted">收到的信、消息和重要决定都可以再翻一翻。</p><div id="correspondenceBody" class="mopts"></div></dialog>
 <dialog id="noteDialog" class="cn-dialog" aria-labelledby="noteTitle"><h3 id="noteTitle">记下这一刻</h3><p class="small muted">这段文字只保存在此浏览器中。</p><textarea id="noteText" maxlength="300" aria-label="这一刻的想法" placeholder="此时此刻，你想留下些什么？"></textarea><div class="cn-dialog-actions"><button class="ghost" id="noteCancel">取消</button><button class="cta" id="noteSave">保存</button></div></dialog>
-<dialog id="assetDialog" class="cn-dialog cn-asset-dialog" aria-labelledby="assetTitle"><div class="cn-section-title"><div><p class="eyebrow">把钱花在想要的生活上</p><h3 id="assetTitle">生活安排</h3></div><button class="ghost small" id="assetClose" aria-label="关闭生活安排">关闭</button></div><div id="assetBody"></div></dialog>
-<dialog id="assetConfirm" class="cn-dialog" aria-labelledby="assetConfirmTitle"><h3 id="assetConfirmTitle">确认生活安排</h3><p id="assetConfirmText"></p><div class="cn-dialog-actions"><button id="assetCancel" class="ghost">再想想</button><button id="assetSubmit" class="cta">确认</button></div></dialog>
+<dialog id="assetDialog" class="cn-dialog cn-asset-dialog" aria-labelledby="assetTitle"><div class="cn-section-title cn-asset-header"><div><p class="eyebrow">把钱花在想要的生活上</p><h3 id="assetTitle">生活安排</h3></div><button class="ghost small" id="assetClose" aria-label="关闭生活安排">关闭</button></div><div id="assetBody"></div></dialog>
 <input id="importFile" type="file" accept="application/json,.json" hidden aria-label="选择人生 JSON 文件">
 <div id="toast" class="cn-toast" role="status" hidden></div>
 <script src="data.js"></script><script src="engine.js"></script>
-<script src="cn-economy.js?v=0.6.0"></script><script src="cn-education.js?v=0.6.0"></script><script src="cn-society.js?v=0.6.0"></script><script src="cn-city-stories.js?v=0.6.0"></script><script src="cn-career.js?v=0.6.0"></script><script src="cn-playback.js?v=0.6.0"></script>
+<script src="cn-economy.js?v=0.7.0"></script>
+<script src="cn-pension.js?v=0.7.0"></script>
+<script src="cn-study.js?v=0.7.0"></script><script src="cn-finance.js?v=0.7.0"></script><script src="cn-world.js?v=0.7.0"></script><script src="cn-education.js?v=0.7.0"></script><script src="cn-society.js?v=0.7.0"></script><script src="cn-family.js?v=0.7.0"></script><script src="cn-city-stories.js?v=0.7.0"></script><script src="cn-career.js?v=0.7.0"></script><script src="cn-playback.js?v=0.7.0"></script>
 <script src="illust.js"></script><script src="pxscenes.js"></script><script src="audio.js"></script><script src="clair.js"></script>
-<script src="cn-data.js?v=0.6.0"></script><script src="cn-assets.js?v=0.6.0"></script><script src="cn-queer.js?v=0.6.0"></script><script src="cn-local.js?v=0.6.0"></script><script src="cn-engine.js?v=0.6.0"></script><script src="cn-visuals.js?v=0.6.0"></script><script src="cn-animation.js?v=0.6.0"></script><script src="cn-views.js?v=0.6.0"></script><script src="cn-interactions.js?v=0.6.0"></script><script src="cn-app.js?v=0.6.0"></script>
+<script src="cn-data.js?v=0.7.0"></script><script src="cn-assets.js?v=0.7.0"></script><script src="cn-queer.js?v=0.7.0"></script><script src="cn-local.js?v=0.7.0"></script><script src="cn-engine.js?v=0.7.0"></script><script src="cn-visuals.js?v=0.7.0"></script><script src="cn-animation.js?v=0.7.0"></script><script src="cn-views.js?v=0.7.0"></script><script src="cn-interactions.js?v=0.7.0"></script><script src="cn-app.js?v=0.7.0"></script>
 </body>
 </html>

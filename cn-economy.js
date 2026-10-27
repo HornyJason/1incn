@@ -15,9 +15,11 @@
   }
   function startingPay(l,kind,k=1.2,random=l.r){
     const p=profile(l),school={985:1.23,211:1.14,'一本':1.06,'二本':1,'三本':.94,'专科':.88}[l.edu.tier]||1;
+    const degreeFactor={硕士:1.12,博士:1.22}[l.eduDone||l.flags.degree]||1;
     const experience=Math.min(.25,(l.careerYears||0)*.008),base=kind==='basic'?.61:kind==='skilled'?.76:.82;
-    return Math.round(Math.max(p.minMonthly*12,p.wage*base*(k/1.35)*school*(1+experience)*Math.exp(random.norm(0,.13))));
+    return Math.round(Math.max(p.minMonthly*12,p.wage*base*(k/1.35)*school*degreeFactor*(1+experience)*Math.exp(random.norm(0,.13))));
   }
-  const takeHome=l=>Math.round(l.income*(l.job&&!l.retired?.9:1));
-  G.CNEconomy={profile,startingPay,takeHome};
+  const earned=l=>Math.round(l.income*(l.job&&!l.retired&&G.CNStudy.active(l)?.7:1));
+  const takeHome=l=>Math.round(earned(l)*(l.job&&!l.retired?.9:1));
+  G.CNEconomy={profile,startingPay,takeHome,earned};
 })(typeof window!=='undefined'?window:globalThis);

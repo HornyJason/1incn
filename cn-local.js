@@ -25,6 +25,7 @@
   function cityProfile(l){
     return G.CNEconomy.profile(l);
   }
+  const isDependent=l=>l.age<18||!l.job&&!l.retired&&['baby','elem','jhs','hs','voc','training'].includes(l.edu.stage);
   function familyLabel(l){return l.wealth>.65?'条件宽裕的家庭':l.wealth<-.6?'需要精打细算的家庭':'普通的工薪家庭';}
   function parentName(r,sex,born){
     const old=D.parentNames[sex],recent=sex==='M'?['宇','浩','俊杰','晨','子航','佳明','嘉诚','文博','志远','泽','阳','凯']:['欣怡','佳宁','晓雨','悦','婷','文静','思敏','嘉怡','晓彤','颖','璐','慧'];
@@ -41,7 +42,7 @@
     }
     if(l.spouse&&!Number.isFinite(l.spouse.income))l.spouse.income=Math.round(40000*(D.provinces.find(p=>p.name===l.pref)?.incomeFactor||1));
     if(l.debt>0&&!l.mortgage&&!l.properties){l.mortgage={balance:Math.max(0,l.debt-l.studentDebt),rate:0,yearsLeft:Math.max(1,Math.ceil(l.debt/18000)),annualPayment:18000,legacy:true};}
-    G.CNAssets.normalize(l);G.CNQueer.normalize(l);G.CNCareer?.normalize(l);G.CNSociety?.normalize(l);if(l.job&&!l.retired)l.income=Math.max(G.CNCareer.floor(l),l.income);
+    G.CNAssets.normalize(l);G.CNQueer.normalize(l);G.CNCareer?.normalize(l);G.CNSociety?.normalize(l);G.CNFamily?.normalize(l);G.CNPension.normalize(l);G.CNStudy.normalize(l);G.CNFinance.normalize(l);if(l.job&&!l.retired)l.income=Math.max(G.CNCareer.floor(l),l.income);
     return l;
   }
   function init(l){
@@ -71,7 +72,7 @@
       opt('全职准备一次考公','准备支出 3,000 元；今年辞职备考，明年公布结果',l=>G.CNCareer.prepareExam(l)),
       opt('继续现在的工作','保持现有岗位',l=>{l.flags.workStyle='企业';return '你决定继续在企业积累经验，开始独立负责一个小项目。';},3),
       opt('尝试接单或做小生意','收入波动更大，时间安排更自由',l=>{l.flags.workStyle='灵活就业';l.flags.flexible=true;l.job.title=l.flags.major==='design'?'自由设计师':l.job.kind==='skilled'?'技术服务接单者':r.pick(['个体经营者','电商小店经营者']);l.job.sector='private';l.jobHist.push({age:l.age,title:l.job.title,income:Math.round(l.income)});return '你开始自己接单或经营一门小生意。有人催进度，也有人记得给你介绍新的机会。';})])];
-    if(a===35&&G.CNSociety.parentsAlive(l)&&!done.festival)return [dec(l,'festival','春节快到了，今年怎么过？',l.pref===l.birthPref?'家人开始张罗年夜饭。':'家里问你，回程车票买好了没有。',[
+    if(a===35&&G.CNSociety.parentsAlive(l)&&(l.pref!==l.birthPref||l.city!==l.birthCity)&&!done.festival)return [dec(l,'festival','春节快到了，今年怎么过？',l.pref===l.birthPref?'家人开始张罗年夜饭。':'家里问你，回程车票买好了没有。',[
       opt('回家吃一顿团圆饭','花费 1,200 元，关系 +8',l=>{l.savings-=1200;s.social+=8;s.happy+=4;return '你把行李放在门口，熟悉的饭菜已经摆上桌。饭后，家人又往你的包里塞了很多东西。';},3),
       opt('留在现在的城市，和朋友一起过','花费 600 元，心情 +6',l=>{l.savings-=600;s.happy+=6;return '你和朋友一起包饺子、做年夜饭，也给家人打了一个长长的视频电话。';}),
       opt('安排工作，把团聚放在错峰假期','关系 +2',l=>{s.social+=2;return '你选择错峰回家。人少一点，陪家人说话的时间反而多了一点。';})])];
@@ -96,28 +97,29 @@
   }
   function year(l,{log}){
     normalize(l);const p=cityProfile(l),a=l.age,r=l.r;
-    const study=l.flags.furtherStudy;if(study&&a>study.startAge&&a<=study.finishAge){l.stats.know+=.5;if(a===study.finishAge){l.eduDone=study.target;l.flags.degree=study.target;log(l,'school',`你完成了这段继续教育，获得了${study.target}学历。持续学习也让你更有底气。`,'good','继续教育的年限、费用和结业条件为游戏设定。');delete l.flags.furtherStudy;}}
-    if(l.job&&!l.retired){l.income=Math.max(G.CNCareer.floor(l),l.income);l.careerYears++;l.careerIncome+=l.income;}
-    if(l.retired&&!l.flags.pensionCalculated){const avg=l.careerYears?l.careerIncome/l.careerYears:48000;l.income=Math.round(cap(avg*.4,14000,65000));l.flags.pensionCalculated=true;}
+    if(a===35&&G.CNSociety.parentsAlive(l)&&l.pref===l.birthPref&&l.city===l.birthCity&&!l.done.festival){l.done.festival=true;log(l,'family','春节前，你和父母约好了年夜饭的时间。就在同一座城里，不用赶车，带上他们爱吃的东西就能回家。');}
+    G.CNStudy.year(l,log);
+    if(l.job&&!l.retired){l.income=Math.max(G.CNCareer.floor(l),l.income);G.CNPension.record(l);l.careerYears++;l.careerIncome+=l.income;}
+    if(l.retired&&!l.pension.calculated)G.CNPension.retire(l);
     if(l.spouse)l.spouse.income=Math.round((l.spouse.income||40000)*1.015);
     let support=0,tuition=0,pay=G.CNEconomy.takeHome(l);
     const spousePay=l.spouse?Math.round(l.spouse.income*(a<62?.84:.5)*.65):0;
     const studying=a>=18&&['univ','college','grad'].includes(l.edu.stage)&&a<(l.flags.gradAge||22)&&!l.job;
-    const dependent=a<18||a===18&&!l.done.further;
-    const independent=!dependent&&!l.flags.livesWithParents;
+    const dependent=isDependent(l)||a===18&&!l.done.further;
+    const independent=!dependent&&!l.flags.livesWithParents&&!l.flags.livingWithChild;
     const rent=studying?6000:l.house||!independent?0:p.rent*12;
-    const daily=dependent?0:Math.round(p.food*12*(l.spouse?1.6:1)*(l.flags.livesWithParents?.65:l.retired?.8:1));
+    const daily=dependent?0:Math.round(p.food*12*(l.spouse?1.6:1)*(l.flags.livesWithParents?.65:l.flags.livingWithChild?.7:l.retired?.8:1));
     const children=l.kids.filter(k=>a-k.birthAge<22).reduce((sum,k)=>sum+(a-k.birthAge<6?12000:a-k.birthAge<18?9000:16000),0);
     const care=(l.fam.father.alive||l.fam.mother.alive)?(l.flags.care==='service'?4800:l.flags.care==='time'?1800:0):0;
     if(studying){tuition=l.edu.stage==='grad'?10000:8000;support=G.CNSociety.parentsAlive(l)?Math.min(tuition+daily+rent,Math.round(l.fam.parentHH*.2)):0;const shortage=Math.max(0,tuition+daily+rent-support);l.studentDebt+=shortage;}
-    const assets=G.CNAssets.year(l,log),{principal,interest,mortgagePay,rentalIncome,propertyCost,carCost,valueChange}=assets;
+    const investmentChange=G.CNFinance.year(l,log),assets=G.CNAssets.year(l,log),{principal,interest,mortgagePay,rentalIncome,propertyCost,carCost,valueChange}=assets;
     let studentPay=0;if(!studying&&l.income>0&&l.studentDebt>0){studentPay=Math.min(l.studentDebt,Math.round(l.income*.08));l.studentDebt-=studentPay;}
     const expense=daily+rent+children+care+tuition+mortgagePay+studentPay+propertyCost+carCost;
     const loanFunding=studying?Math.max(0,tuition+daily+rent-support):0;
-    const balance=a>=18?pay+spousePay+support+loanFunding+rentalIncome-expense:0;
+    const balance=!dependent?pay+spousePay+support+loanFunding+rentalIncome-expense:0;
     l.savings+=balance;G.CNAssets.sync(l);
-    l.finances={year:l.year,gross:Math.round(l.income),pay,spousePay,support,daily,rent,children,care,tuition,mortgagePay,principal,interest,studentPay,loanFunding,rentalIncome,propertyCost,carCost,valueChange,expense,balance,model:true};
-    if(a>=18&&(a===18||a%5===0))log(l,'money',`${l.year} 年的家庭账本：到账约${G.CNEngine.money(pay+spousePay+support+rentalIncome)}，生活和还款约${G.CNEngine.money(expense)}。${balance>=0?'本年结余':'本年超支'}约${G.CNEngine.money(Math.abs(balance))}。`,'neutral','薪酬扣除、伴侣共同生活投入、租金、学费、照护和借款均为游戏估算，不对应真实政策或金融合同。');
+    l.finances={year:l.year,gross:G.CNEconomy.earned(l),pay,spousePay,support,daily,rent,children,care,tuition,mortgagePay,principal,interest,studentPay,loanFunding,rentalIncome,propertyCost,carCost,valueChange,investmentChange,expense,balance,model:true};
+    if(!dependent&&(a===18||a%5===0))log(l,'money',`${l.year} 年的家庭账本：到账约${G.CNEngine.money(pay+spousePay+support+rentalIncome)}，生活和还款约${G.CNEngine.money(expense)}。${balance>=0?'本年结余':'本年超支'}约${G.CNEngine.money(Math.abs(balance))}。`,'neutral','薪酬扣除、伴侣共同生活投入、租金、学费、照护和借款均为游戏估算，不对应真实政策或金融合同。');
     if(studying&&loanFunding>0&&a===(l.flags.gradAge||22)-1)log(l,'school','家里尽力支持你，剩下的求学费用先记为教育借款。你打算工作后慢慢还。','neutral');
     if(a===1)log(l,'family','周岁那天，家人给你拍了一张全家福。你还不明白什么是生日，只觉得今天很热闹。','good');
     if(a===16&&l.edu.stage==='voc')log(l,'school','实训课上，你第一次独立完成了一道工序。老师说，认真做事也是一种本事。','good');
@@ -138,10 +140,10 @@
     if(!l.alive)return [];
     return [
       {id:'exercise',label:l.age<18?'去操场动一动':'散步或锻炼',hint:'健康 +3，心情 +1',ok:l.age>=6,cost:0},
-      {id:'read',label:'读书学点新东西',hint:'知识 +3，心情 +1',ok:l.age>=6,cost:0},
+      {id:'read',label:'读书学点新东西',hint:'知识 +1，心情 +1',ok:l.age>=6,cost:0},
       {id:'family',label:'和家人好好聊聊',hint:'关系 +4，心情 +2',ok:l.age>=6,cost:0},
       {id:'travel',label:l.age<18?'和同学出去走走':'给自己一个短假',hint:'心情 +6，花费 '+(l.age<18?'100':'1,200')+' 元',ok:l.age>=12,cost:l.age<18?100:1200},
-      {id:'skill',label:'上一门技能课',hint:'知识 +6，花费 2,000 元',ok:l.age>=18&&!l.retired,cost:2000},
+      {id:'skill',label:'上一门技能课',hint:'知识 +2，花费 2,000 元',ok:l.age>=18&&!l.retired,cost:2000},
       {id:'rest',label:'认真休息一天',hint:'健康 +2，心情 +4',ok:l.age>=6,cost:0}
     ].filter(x=>x.ok).map(x=>({...x,disabled:l.actions.some(a=>a.age===l.age)||x.cost>Math.max(0,l.savings)+(l.age<18?200:0)}));
   }
@@ -149,14 +151,14 @@
     const fail=message=>({ok:false,message});if(!l.alive||l.age<6)return fail('上小学以后，才会有自己的花钱安排。');
     const record=(text,cost)=>{l.savings-=cost;if(l.finances?.year===l.year){l.finances.other=(l.finances.other||0)+cost;l.finances.expense+=cost;l.finances.balance-=cost;}log(l,'money',text,'good','课程、迁居费用与学历变化均为游戏设定。');};
     if(action==='study'){
-      const classes={reading:{name:'读书与兴趣课程',cost:l.age<18?0:300,know:.2},skill:{name:'职业技能课程',cost:4000,know:.5},degree:{name:'继续教育深造',cost:20000,know:.2}},course=classes[args.id];
+      const classes={reading:{name:'读书与兴趣课程',cost:l.age<18?0:300,know:1},skill:{name:'职业技能课程',cost:4000,know:2},degree:{name:'继续教育深造',cost:20000,know:1}},course=classes[args.id];
       if(!course||l.age<18&&args.id!=='reading')return fail('这个阶段还不能报名该课程。');
       if(l.flags.studyYear===l.age)return fail('这一年的课程已经安排好了。');
-      if(args.id==='degree'&&(l.retired||l.flags.furtherStudy||['univ','college','grad'].includes(l.edu.stage)&&!l.job))return fail('目前已有学习安排，或暂不适合报名。');
-      if(args.id==='degree'&&/硕士|博士/.test(l.eduDone||''))return fail('已经完成较高学历，可以继续选择读书或技能课程。');
+      if(args.id==='degree'&&(!l.job||l.retired||l.flags.furtherStudy||['univ','college','grad'].includes(l.edu.stage)&&!l.job))return fail('目前已有学习安排，或暂不适合报名。');
+      if(args.id==='degree'&&/博士/.test(l.eduDone||''))return fail('已经完成较高学历，可以继续选择读书或技能课程。');
       if(l.savings<course.cost)return fail('结余不足，先为生活留一些余地。');
       l.flags.studyYear=l.age;l.stats.know+=course.know;
-      if(args.id==='degree')l.flags.furtherStudy={startAge:l.age,finishAge:l.age+3,target:/本科|硕士/.test(l.eduDone||'')?'硕士':/大专/.test(l.eduDone||'')?'本科':'大专'};
+      if(args.id==='degree'){const target=G.CNStudy.begin(l);record(`你花费 20,000 元报名半工半读的${target}升学准备。从现在起工作收入按七成领取，明年查询考试结果；通过后再完成后续课程。`,course.cost);return {ok:true,message:'已开始半工半读，明年查询考试结果。'};}
       record(l.age<18?'家人给你报了一门读书与兴趣课程。你翻开新的书，也认识了新的朋友。':`你花费 ${G.CNEngine.money(course.cost)} 报名${course.name}${args.id==='degree'?'，接下来三年继续学习，学费已一次付清':'，开始认真学一点新东西'}。`,course.cost);
     }else if(action==='wellbeing'){
       const services={gym:{name:'健身房月卡',cost:180,age:16,health:.8,happy:.5},checkup:{name:'年度体检',cost:600,age:18,health:.6,happy:.3},parents:{name:'父母体检',cost:600*[l.fam.father,l.fam.mother].filter(p=>p.alive).length,age:18},match:{name:'相亲见面',cost:300,age:20}};
@@ -164,6 +166,7 @@
       if(l.flags['service_'+args.id]===l.age)return fail('今年已经安排过这项活动。');
       if(args.id==='parents'&&!G.CNSociety.parentsAlive(l))return fail('父母已经离世，不能再安排体检。');
       if(args.id==='match'&&(l.partner||l.spouse||l.romance?.candidate))return fail('先认真处理眼前的感情，再考虑新的相识。');
+      if(args.id==='match'&&(l.flags.familyCrisisAge===l.age||l.flags.familyMilestoneAge===l.age))return fail('今年先给自己一点时间，明年再安排新的相识。');
       if(l.savings<service.cost)return fail('积蓄不足，先留一些钱给日常生活。');
       l.flags['service_'+args.id]=l.age;l.stats.health+=service.health||0;l.stats.happy+=service.happy||0;
       if(args.id==='parents')for(const p of [l.fam.father,l.fam.mother])if(p.alive)p.health=Math.min(100,p.health+10);
@@ -175,14 +178,14 @@
       const destination={...l,pref:args.pref,city:args.city,rural:false},cost=Math.round(1800+cityProfile(destination).rent*2);
       if(l.savings<cost)return fail('结余不足以支付搬迁和安置费用。');
       if(!l.retired)G.CNCareer.leave(l);
-      l.properties.filter(p=>p.use==='self').forEach(p=>p.use='vacant');l.pref=args.pref;l.city=args.city;l.rural=false;l.flags.livesWithParents=false;l.flags.moveYear=l.age;l.trail.push({age:l.age,pref:l.pref,city:l.city});G.CNAssets.sync(l);
+      l.properties.filter(p=>p.use==='self').forEach(p=>p.use='vacant');l.pref=args.pref;l.city=args.city;l.rural=false;l.flags.livesWithParents=false;delete l.flags.livingWithChild;l.flags.moveYear=l.age;l.trail.push({age:l.age,pref:l.pref,city:l.city});G.CNAssets.sync(l);
       record(`你花费 ${G.CNEngine.money(cost)} 搬到${l.city}并安顿下来。原有自住房暂时空置，工作需要在新城市重新寻找。`,cost);
     }else return fail('未知的生活安排。');
     return {ok:true,message:'已经记进生活与账本。'};
   }
   function act(l,id,log){const o=actionOptions(l).find(o=>o.id===id);if(!o||o.disabled)return false;const s=l.stats;
     if(o.cost&&l.age>=18){l.savings-=o.cost;if(l.finances){l.finances.other=(l.finances.other||0)+o.cost;l.finances.expense+=o.cost;l.finances.balance-=o.cost;}}
-    const effects={exercise:{health:3,happy:1},read:{know:.2,happy:1},family:{social:4,happy:2},travel:{happy:6},skill:{know:.5},rest:{health:2,happy:4}};
+    const effects={exercise:{health:3,happy:1},read:{know:1,happy:1},family:{social:4,happy:2},travel:{happy:6},skill:{know:2},rest:{health:2,happy:4}};
     for(const[k,v]of Object.entries(effects[id]))s[k]=Math.min(100,s[k]+v);
     const text={exercise:'你给自己留出时间活动身体，回来以后精神好了一点。',read:'你关掉手机，认真读了几页书，又学会了一点新东西。',family:'你和家人好好聊了一会儿。没有什么大事，但彼此都安心了一点。',travel:'你暂时离开熟悉的日常，出去走了走，带着一点新鲜感回来。',skill:'你报名上一门技能课，把学到的东西一点点用在生活和工作里。',rest:'你把能推迟的事暂时放下，认真休息了一天。'};
     l.actions.push({age:l.age,id,label:o.label});log(l,'action',text[id],'good');return true;}
@@ -193,5 +196,5 @@
     ['hobby','日子有自己的味道','发展了至少两种兴趣',l.hobbies.length>=2],['memoir','留一页给后来的人','整理了自己的回忆',!!l.flags.memoir],
     ['note','记住这一刻','为人生写下便签',l.notes.length>0],['long','和日子慢慢相处','活到 80 岁',l.age>=80]
     ];return all.map(([id,title,text,unlocked])=>({id,title,text,unlocked}));}
-  G.CNLocal={init,normalize,addDecisions,housing,year,contextualStory,cityProfile,familyLabel,culture,actionOptions,act,spend,achievements};
+  G.CNLocal={isDependent,init,normalize,addDecisions,housing,year,contextualStory,cityProfile,familyLabel,culture,actionOptions,act,spend,achievements};
 })(typeof window!=='undefined'?window:globalThis);

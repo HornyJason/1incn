@@ -276,12 +276,23 @@ header.top { gap:8px; }
 .letterwrap .ltpaper { border-bottom-left-radius:0; border-bottom-right-radius:0; position:relative; z-index:0; }
 .letterwrap .phopts { margin-top:0; border-top-left-radius:0; border-top-right-radius:0; position:relative; z-index:1; }
 .letterwrap.letter-complete .ltpaper { border-bottom-left-radius:12px; border-bottom-right-radius:12px; }
-#feed li { animation:none; }
+#feed li, #feed .sub > li:first-child:not(.chapter), #feed .tw, #feed li::before, #feed li::after { animation:none!important; transition:none!important; }
+.ph.mailapp .mlscroll { flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; }
+.ph.mailapp .mlscroll .phlist { flex:none; overflow:visible; }
+.ph.mailapp .mlscroll .phopts { flex:none; max-height:none; overflow:visible; }
+.ph.mailapp .phtop, .ph.mailapp .mlhead { flex-shrink:0; }
 .controls.cn-controls { align-items:center; }
 .controls.cn-controls>button,.controls.cn-controls>details>summary { min-height:42px; box-sizing:border-box; padding:8px 15px; font-size:13px; line-height:24px; }
 .controls.cn-controls .cn-focus-control { display:flex; gap:8px; align-items:center; margin:0; }
 #mobileDetails { margin-left:auto; }
 #mobileDetailsCompact { display:none; }
+#assetDialog { padding:0; }
+#assetDialog .cn-asset-header { position:sticky; top:0; z-index:5; padding:20px 24px 14px; margin:0; background:var(--paper); border-bottom:1px solid var(--line); align-items:center; }
+#assetDialog #assetClose { flex:none; min-height:42px; }
+#assetBody { padding:0 24px 24px; }
+.cn-inline-confirm { flex-basis:100%; margin:8px 0; padding:10px 12px; font-size:12px; color:var(--muted); border-left:2px solid var(--accent); background:var(--bg); }
+#assetBody button[data-confirming] { background:var(--accent-soft); outline:1px solid var(--accent); }
+.paper.exam .ov::after { background:var(--accent); }
 @media(max-width:540px){#mobileDetails { display:none; }#mobileDetailsCompact { display:block; }.controls.cn-controls { flex-wrap:wrap; }.controls.cn-controls .cn-focus-control { gap:4px; }.controls.cn-controls .cn-focus-control>span { font-size:12px; }}
 @media(max-width:600px){
   header.top { padding:9px 10px; gap:5px; }

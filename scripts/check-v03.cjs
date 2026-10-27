@@ -1,14 +1,15 @@
 const assert=require('node:assert/strict'),fs=require('node:fs');
-for(const f of ['data','engine','cn-data','cn-economy','cn-education','cn-society','cn-city-stories','cn-assets','cn-queer','cn-career','cn-local','cn-engine','cn-views'])require('../'+f+'.js');
+for(const f of ['data','engine','cn-data','cn-economy','cn-pension','cn-study','cn-finance','cn-world','cn-education','cn-society','cn-family','cn-city-stories','cn-assets','cn-queer','cn-career','cn-local','cn-engine','cn-views'])require('../'+f+'.js');
 const E=CNEngine,date='2026-10-23T12:00:00+08:00',make=seed=>E.createLife({seed,date,pref:'北京市',sex:'M'});
 function adult(seed=803){const l=make(seed);l.age=30;l.year=l.born.y+30;l.savings=10000000;l.income=200000;l.done={social:true,workStyle:true};l.flags.livesWithParents=false;l.finances={year:l.year,balance:0,expense:0};return l;}
 const l=adult(),start=l.savings,net0=E.assetTotals(l).netWorth;
 const q=CNAssets.quote(l,'small','loan');
 assert.ok(E.transact(l,'buyHome',{size:'small',mode:'loan',use:'self'}).ok);
-assert.equal(start-l.savings,q.down+q.fees);assert.equal(l.debt,q.balance);assert.equal(E.assetTotals(l).netWorth,net0-q.fees);
+assert.equal(start-l.savings,q.down+q.fees+q.balance);assert.equal(l.debt,0);assert.equal(E.assetTotals(l).netWorth,net0-q.fees);
 assert.ok(E.transact(l,'buyHome',{size:'small',mode:'cash',use:'rent'}).ok);
 assert.ok(E.transact(l,'buyCar',{id:'compact'}).ok);
 assert.equal(l.savings-start,l.finances.balance,'手动资产现金流与账本一致');
+const borrower=adult();borrower.savings=1100000;borrower.edu.stage='work';assert.ok(E.transact(borrower,'buyHome',{size:'small',mode:'loan',use:'self'}).ok);assert.ok(borrower.debt>0);const debtBefore=borrower.debt;borrower.age++;borrower.year++;CNLocal.year(borrower,{log(){}});assert.ok(borrower.debt<debtBefore&&borrower.debt>0);assert.ok(borrower.finances.interest>0);
 const initial=E.serialize(l),a=E.hydrate(initial),b=E.hydrate(E.serialize(l));
 for(let n=0;n<12;n++){
   for(const x of[a,b]){x.age++;x.year++;const cash=x.savings;CNLocal.year(x,{log(){}});assert.equal(x.savings-cash,x.finances.balance);assert.ok(x.finances.rentalIncome>0);assert.ok(x.finances.propertyCost>0);assert.ok(x.finances.carCost>0);}
@@ -35,7 +36,7 @@ assert.ok(E.requestPrivate(gay,'family'));d=E.pendingDecisions(gay)[0];E.resolve
 gay.job={title:'基层公共服务岗位',kind:'college',sector:'civil'};assert.ok(E.requestPrivate(gay,'work'));d=E.pendingDecisions(gay)[0];E.resolve(gay,d,0);assert.equal(CNQueer.blocked(gay),true);d=E.pendingDecisions(gay)[0];assert.equal(d.id,'workBias');E.resolve(gay,d,0);
 gay.age=38;gay.year=gay.born.y+38;gay.done.marriage=true;gay.done.children=true;const promotion=E.pendingDecisions(gay)[0];assert.equal(promotion.id,'career');const income=gay.income;E.resolve(gay,promotion,0);assert.equal(gay.income,income);
 const straight=queerLife('admirer');d=E.pendingDecisions(straight)[0];assert.equal(d.id,'sameConfession');E.resolve(straight,d,0);assert.equal(straight.queer.orientation,'straight');assert.equal(E.privateOptions(straight).length,0);
-const couple=queerLife();couple.done.queerCrush=true;couple.partner={name:'模拟男友',sex:'M'};d=E.pendingDecisions(couple)[0];assert.equal(d.id,'commitment');E.resolve(couple,d,0);assert.equal(couple.spouse.union,'partnership');assert.ok(!E.pendingDecisions(couple).some(x=>x.id==='children'),'不会自动触发异性婚育');
+const couple=queerLife();couple.done.queerCrush=true;couple.partner={name:'模拟男友',sex:'M',sinceAge:couple.age-2};d=E.pendingDecisions(couple)[0];assert.equal(d.id,'commitment');E.resolve(couple,d,0);assert.equal(couple.spouse.union,'partnership');assert.ok(!E.pendingDecisions(couple).some(x=>x.id==='children'),'不会自动触发异性婚育');
 const child1=make(9001),child2=make(9001);child1.focus='事业';child2.focus='平衡';E.runAuto(child1,5);E.runAuto(child2,5);assert.deepEqual(child1.stats,child2.stats,'小学前不应用生活重心');
 const invalid=E.serialize(l);invalid.properties[0].value=NaN;assert.throws(()=>E.hydrate(invalid));
 const invalidQ=E.serialize(gay);invalidQ.queer.out.work='invalid';assert.throws(()=>E.hydrate(invalidQ));

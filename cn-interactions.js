@@ -23,7 +23,7 @@
       workStyle:{kind:'line',from:parent,msgs:G.CNSociety.parentsAlive(l)?['最近工作还顺利吗？','你有没有考虑过考公？如果想全职准备，要提前安排好这一年的生活费。','不管怎么选，还是要听听你自己的想法。']:['最近又看到招考的消息，你重新考虑起未来的工作。','要不要留出一年时间，认真准备一次考试？']},
       festival:{kind:'call',from:parent,video:true,msgs:['喂，听得见吗？最近忙不忙？','快过年了，家里已经开始准备年夜饭了。','今年怎么安排呀？不管回不回来，都记得好好吃饭。']},
       care:{kind:'call',from:parent,msgs:['检查结果拿到了，医生说接下来要定期复查。','本来不想让你操心，但有些安排，还是得一起商量。','以后陪诊、平时照应，我们想听听你的想法。']},
-      marriage:{kind:'sign',doc:'共同生活意愿书',terms:[`当事人：${name(l)}、${l.partner?.name || '伴侣'}`,'认真讨论居住安排、家庭开支与彼此的生活期待。','尊重双方意愿，共同承担生活责任。','领证前，一起确认今后共同生活的打算。']},
+      marriage:{kind:'sign',doc:'共同生活意愿书',terms:[`当事人：${name(l)}、${l.partner?.name || '伴侣'}`,'认真讨论居住安排、家庭开支与彼此的生活期待。','尊重双方意愿，共同承担生活责任。','认真照顾彼此，也为未来留出余地。']},
       commitment:{kind:'letter',from:l.partner?.name || '伴侣',msgs:[`${l.name.mei}：`,'这封信写了好几次，最后还是觉得，普通的话最好。','我想和你一起买菜、散步，在很累的时候给对方留一盏灯。','往后的日子，我们要怎样一起走？我想听听你的答案。']},
       children:{kind:'line',from:l.spouse?.name || '伴侣',msgs:['关于孩子的事，今晚我们认真聊聊吧。','时间、照料和开支都需要一起商量。','不着急给谁一个答案，先听听我们自己想要的生活。']},
       career:{kind:'sign',doc:'职业发展意向确认书',terms:[`当前岗位：${l.job?.title || '工作岗位'}`,'你可以继续投入职业发展，也可以学习新的技能。','请结合自己的健康、家庭与生活期待作决定。','把想清楚的选择写下来。']},
@@ -33,8 +33,8 @@
       queerCrush:{kind:'letter',from:'写给自己的信',msgs:['有些心事，先写下来也好。',`我发现，自己会留意那个${l.sex==='M'?'男生':'女生'}的消息。想和对方多说两句话，见到时又会有点紧张。`,'这些感觉并不需要立刻向谁解释。什么时候说、向谁说，都可以慢慢决定。']},
       sameConfession:{kind:'line',from:pal.alive?pal.name:'一位信任你的朋友',msgs:['有件事想认真和你说。','我对你的喜欢，好像已经超出了朋友的感情。','你不用勉强自己，也不用急着回答。我会尊重你的感受。']}
     };
-    const dynamic=d.id==='collegeChoices'||d.id==='examRetry'||d.id.startsWith('examAgain_')?{kind:'exam',doc:d.title,head:`${l.year} 年升学安排`,sub:'确认志愿'}:d.id==='admission'?{kind:'notice',doc:'录取查询',from:'招生信息查询',msgs:[d.text]}:d.id.startsWith('civilResult_')?{kind:'notice',doc:'招录结果通知',from:'招录单位',msgs:[d.text]}:d.id.startsWith('relationship_')?{kind:'line',from:l.romance.candidate.name,msgs:[d.text]}:d.id.startsWith('proposal_')?{kind:'letter',from:l.partner.name,msgs:[d.text]}:d.id.startsWith('funeral_')?{kind:'call',from:'亲人',msgs:[d.text]}:null;
-    const special = d.id.startsWith('severance_')?{kind:'notice',doc:'裁员通知',from:'原单位人事部',msgs:[`${name(l)}：`,d.text,'请确认接下来的结算安排。']}:d.id.startsWith('jobSearch_')?{kind:'mail',from:'招聘与就业服务',msgs:[d.text,'你可以继续投递，也可以先调整一阵子。新的工作和薪酬仍有不确定性。']}:d.id.startsWith('out_') ? {kind:'line',from:d.id==='out_family'?parent:d.id==='out_friends'?'信任的朋友':'信任的同事',msgs:['你说有件重要的事想聊，我在听。','如果现在还没准备好，也可以以后再说。']} : null;
+    const dynamic=d.id.startsWith('grandcare_')?{kind:'call',from:l.kinship.care.name,msgs:[`最近照顾${l.kinship.care.grandchild}有点忙不过来，想和你商量件事。`,`你愿不愿意搬到${l.kinship.care.city}，来我们家住一阵，帮忙带带孩子？`,'先看你的身体和安排，不方便也没关系。']}:d.id.startsWith('gift_')?{kind:'notice',doc:d.title,from:l.kinship.pendingGifts[0].name,msgs:[d.text]}:d.id.startsWith('adoption_')?{kind:'notice',doc:'领养申请回信',from:'领养服务窗口',msgs:[d.text]}:d.id==='collegeChoices'||d.id==='examRetry'||d.id.startsWith('examAgain_')?{kind:'exam',doc:d.title,head:`${l.year} 年升学安排`,sub:'确认志愿'}:d.id==='admission'?{kind:'notice',doc:'录取查询',from:'招生信息查询',msgs:[d.text]}:d.id.startsWith('civilResult_')?{kind:'notice',doc:'招录结果通知',from:'招录单位',msgs:[d.text]}:d.id.startsWith('relationship_')?{kind:'line',from:l.romance.candidate.name,msgs:l.romance.candidate.confession?['有件事一直想亲口告诉你。','我喜欢的是同性，也一直对你有超出朋友的感情。','你不用勉强自己，我会尊重你的回答。']:['和你在一起的时候，我总觉得很自在。','我想认真问问你，愿不愿意和我试着交往？','不用急着回答，告诉我你真实的想法就好。']}:d.id.startsWith('proposal_')?{kind:'letter',from:l.partner.name,msgs:['这几年一起经历的事，我一直记在心里。','我想和你商量往后的日子，住在哪里，怎样照顾彼此。','你愿意和我一起，把这个家慢慢安顿好吗？']}:d.id.startsWith('funeral_')&&l.age<18?{kind:'notice',doc:'和家人告别',from:'家人',msgs:[d.text]}:d.id.startsWith('funeral_')?{kind:'call',from:l.fam.father.alive?'爸爸':l.fam.mother.alive?'妈妈':l.fam.siblings.find(p=>p.alive!==false)?(l.fam.siblings.find(p=>p.alive!==false).sei||l.name.sei)+l.fam.siblings.find(p=>p.alive!==false).name:'家里的亲戚',msgs:[d.text,'家里的事，我们先张罗着。你也要照顾好自己。']}:null;
+    const special = d.id.startsWith('severance_')?{kind:'notice',doc:'裁员通知',from:'原单位人事部',msgs:[`${name(l)}：`,d.text,'请确认接下来的结算安排。']}:d.id.startsWith('jobSearch_')?{kind:'mail',from:'招聘与就业服务',msgs:[d.text,'选一份适合现在的工作，也可以先休整一阵。']}:d.id.startsWith('out_') ? {kind:'line',from:d.id==='out_family'?parent:d.id==='out_friends'?'信任的朋友':'信任的同事',msgs:['你说有件重要的事想聊，我在听。','如果现在还没准备好，也可以以后再说。']} : null;
     const replies={
       schoolLetter:[{say:'信收到啦！等我到了新学校，就给你写信。',reply:'那就说好了。下次见面，要告诉我新学校是什么样的。'},{say:'谢谢你的信。我会好好收着的！',reply:'暑假快乐，我们开学再见。'}],
       homeLetter:[{say:'最近有好事，也有一点烦恼。写下来给你们看看，别担心我。',reply:'我们都看到了。慢慢来，累了就歇一歇。'},{say:'信我看到了。今天有空，想听听你们的声音。',reply:'在呢，想聊多久都行。'},{say:'这封信我收好了。下次回家，带点这里的特产给你们。',reply:'人回来就好，路上注意安全。'}],
@@ -60,6 +60,7 @@
   }
   const buttons = (p, cls='') => p.options.map(o=>`<button type="button" data-i="${o.i}" class="${cls}">${esc(o.label)}${o.hint?`<small>${esc(o.hint)}</small>`:''}</button>`).join('');
   function open(p, handlers={}) {
+    p={...p,...(p.terms?{terms:p.terms.filter(t=>!/本页记录游戏中的决定|正式婚姻登记另行办理|认真照顾彼此，也为未来留出余地/.test(t))}:{})};
     clear();PH.done=false;
     const modal=$('#modal'),box=$('#mPhone'),sheet=$('#mOpts');
     modal.className='modal';box.innerHTML='';sheet.innerHTML='';
@@ -118,7 +119,7 @@
           PH.clock=setInterval(()=>{sec++;status.textContent=`${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;},1000);talk(root);
         };
       }else{
-        box.innerHTML=`<div class="ph mailapp">${top}<div class="mlhead"><b>收件箱</b><span>1 封新邮件</span></div><div class="phlist mllist"><div class="mlitem"><span class="mlfrom">${esc(p.from)}</span><b>${esc(p.title)}</b>${p.msgs.map(m=>`<p>${esc(m)}</p>`).join('')}</div></div><div class="phopts lnopts" hidden></div></div>`;
+        box.innerHTML=`<div class="ph mailapp">${top}<div class="mlhead"><b>收件箱</b><span>1 封新邮件</span></div><div class="mlscroll"><div class="phlist mllist"><div class="mlitem"><span class="mlfrom">${esc(p.from)}</span><b>${esc(p.title)}</b>${p.msgs.map(m=>`<p>${esc(m)}</p>`).join('')}</div></div><div class="phopts lnopts" hidden></div></div></div>`;
         chips(box.firstElementChild);sound('msg');
       }
     }else if(['exam','sign','notice','payslip'].includes(p.kind)){
@@ -151,7 +152,7 @@
       const status=root.querySelector('.phst');if(status)status.textContent='通话结束';
     }else root?.querySelector('.popts, .exopts')?.setAttribute('hidden','');
     const res=`<div class="phres"><span class="lbl">你选择了「${esc(label)}」</span>${logs.map(e=>`<p>${esc(e.t)}</p>`).join('') || '<p>这个决定已经记下。</p>'}</div>`;
-    if(root){const list=root.querySelector('.phlist');(list || root).insertAdjacentHTML('beforeend',res);root.insertAdjacentHTML('beforeend','<button type="button" class="phend">继续 ▸</button>');if(list)list.scrollTop=list.scrollHeight;}
+    if(root){const list=root.querySelector('.phlist');(list || root).insertAdjacentHTML('beforeend',res);root.insertAdjacentHTML('beforeend','<button type="button" class="phend">继续 ▸</button>');if(list){const scroll=root.querySelector('.mlscroll')||list;scroll.scrollTop=scroll.scrollHeight;}}
     else $('#mOpts').innerHTML=`${res}<button type="button" class="mnext">继续 ▸</button>`;
     const proceed=()=>{close();next?.();};
     modal.querySelector('.phend, .mnext').onclick=proceed;

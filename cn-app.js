@@ -31,7 +31,7 @@
   function save(){if(S.life&&(S.life.alive||S.life.playback))store.set('current',E.serialize(S.life));}
   function saveAnnotations(){if(S.life?.alive||S.life?.playback)return save();if(!S.life)return;const past=store.get('past',[]);if(Array.isArray(past)){const i=past.findIndex(l=>l.seed===S.life.seed&&l.born.y===S.life.born.y);if(i>=0){past[i]=E.serialize(S.life);store.set('past',past);}}}
   function backupCurrent(){const current=store.get('current',null);if(!current?.alive&&!current?.playback)return;const previous=store.get('backups',[]);const backups=(Array.isArray(previous)?previous:[]).filter(l=>l.seed!==current.seed);backups.unshift(current);store.set('backups',backups.slice(0,3));}
-  function openLife(raw){S.life=E.hydrate(JSON.parse(JSON.stringify(raw)));S.progress=S.life.playback?.progress||0;S.paused=true;S.feedExpanded=false;if(!S.life.started&&S.life.alive){renderBirth();go('birth');}else if(S.life.alive||S.life.playback){go('life');toast('已恢复记录，点击“继续”开始。');}else{renderEnd(S.life);go('end');}}
+  function openLife(raw){S.life=E.hydrate(JSON.parse(JSON.stringify(raw)));if(S.life.alive&&E.settleDebts(S.life))save();S.progress=S.life.playback?.progress||0;S.paused=true;S.feedExpanded=false;if(!S.life.started&&S.life.alive){renderBirth();go('birth');}else if(S.life.alive||S.life.playback){go('life');toast('已恢复记录，点击“继续”开始。');}else{renderEnd(S.life);go('end');}}
 
   function showResume(){const l=store.get('current',null);const valid=E.supportedVersions.includes(l?.version)&&(l.alive||l.playback);$('#btnResume').hidden=!valid;$('#resumeInfo').hidden=!valid;$('#resumeInfo').textContent=valid?`${l.name.sei}${l.name.mei} · ${l.age} 岁 · 出生于${l.birthPref}`:'';$('#btnBorn').classList.toggle('secondary',!!valid);}
   function go(id){if(!['home','birth','life','end','data','past'].includes(id))return;if(id!=='life'){S.paused=true;CNInteractions.close();save();}closeMenus();$('#globalMenu').open=false;$('#lifeMenu').open=false;S.view=id;document.body.dataset.view=id;$('#topPlayback').hidden=id!=='life';$$('.view').forEach(v=>v.classList.toggle('active',v.id===id));if(id==='past')renderPast();if(id==='data')renderData();if(id==='home')showResume();if(S.life&&id==='life')renderLife();window.scrollTo({top:0,behavior:'instant'});}
@@ -98,7 +98,7 @@
     $('#lAge').textContent=l.age;$('#lYear').textContent=l.year+'年';$('#sbAge').textContent=l.age;$('#sbYear').textContent=l.year+'年';$('#sbChar').innerHTML=CN_PIXEL.pixelChar(l);
     selectWidgets.get('selFocus').update(l.focus);CNAnimation.update({...l,log:l.log.filter((e,i)=>CNPlayback.visible(l,i))});
     $('#stats').innerHTML=stats.map(([k,n,c])=>`<div class="stat"><span class="lbl">${n}</span><b>${Math.round(l.stats[k])}</b><div class="bar"><i style="width:${l.stats[k]}%;background:${c}"></i></div></div>`).join('');
-    $('#money').innerHTML=`<div>年收入<b>${esc(E.money(l.income))}</b></div><div>折合每月<b>${esc(E.money(l.income/12))}</b></div><div>${l.savings>=0?'结余':'债务'}<b>${esc(E.money(Math.abs(l.savings)))}</b></div>${l.debt?`<div>借款<b>${esc(E.money(l.debt))}</b></div>`:''}`;
+    $('#money').innerHTML=CNLocal.isDependent(l)?'<div>日常开支由家庭承担</div>':`<div>${l.retired?'年养老金':'年收入'}<b>${esc(E.money(CNEconomy.earned(l)))}</b></div><div>${l.retired?'每月养老金':'折合每月'}<b>${esc(E.money(CNEconomy.earned(l)/12))}</b></div><div>${l.savings>=0?'结余':'债务'}<b>${esc(E.money(Math.abs(l.savings)))}</b></div>${l.debt?`<div>借款<b>${esc(E.money(l.debt))}</b></div>`:''}`;
     renderFeed();renderSide();renderPrivate();renderControls();
   }
   const iconFor={birth:'baby',family:'family',school:'school',work:'work',choice:'turn',money:'coin',health:'hospital',death:'candle',story:'leaf',note:'book',action:'leaf'};
@@ -106,7 +106,23 @@
   function renderFeed(){const l=S.life;if(!l)return;
     const list=l.log.map((e,i)=>({...e,index:i})).filter(e=>CNPlayback.visible(l,e.index));
     const ages=[...new Set(list.map(e=>e.age))].sort((a,b)=>b-a),shown=S.feedExpanded?ages:ages.slice(0,8);
-    $('#feed').innerHTML=shown.length?shown.map(a=>`<li class="yearmark">${l.born.y+a} 年 · ${a} 岁<ol class="feed sub">${list.filter(e=>e.age===a).reverse().map(e=>`<li class="${esc(e.tone)} ${esc(e.c)}${e.star?' starred':''}"><button class="star" data-star="${e.index}" aria-label="${e.star?'取消收藏':'收藏'}这一刻" aria-pressed="${!!e.star}">${e.star?'★':'☆'}</button><span class="a">${a} 岁</span><span class="ic" aria-hidden="true">${icon(e.c)}</span><span class="tw">${esc(e.t)}</span></li>`).join('')}</ol></li>`).join(''):'<li>这里还没有记录。想记住的瞬间，可以点旁边的星星收藏。</li>';
+    const root=$('#feed'),key=[l.seed,l.born.y,l.name.sei,l.name.mei].join(':');
+    if(root.dataset.lifeKey!==key){root.replaceChildren();root.dataset.lifeKey=key;}
+    const years=new Map([...root.children].map(n=>[Number(n.dataset.age),n]));let cursor=root.firstElementChild;
+    for(const a of shown){
+      let year=years.get(a);if(!year){year=document.createElement('li');year.className='yearmark';year.dataset.age=a;year.append(document.createTextNode(`${l.born.y+a} 年 · ${a} 岁`));const sub=document.createElement('ol');sub.className='feed sub';year.append(sub);}
+      if(year!==cursor)root.insertBefore(year,cursor);cursor=year.nextElementSibling;years.delete(a);
+      const sub=year.querySelector('ol'),rows=new Map([...sub.children].map(n=>[Number(n.dataset.index),n]));let rowCursor=sub.firstElementChild;
+      for(const e of list.filter(e=>e.age===a).reverse()){
+        let row=rows.get(e.index);if(!row){row=document.createElement('li');row.dataset.index=e.index;row.innerHTML=`<button class="star" data-star="${e.index}"></button><span class="a">${a} 岁</span><span class="ic" aria-hidden="true">${icon(e.c)}</span><span class="tw"></span>`;}
+        row.className=`${e.tone} ${e.c}${e.star?' starred':''}`;const star=row.querySelector('.star');star.textContent=e.star?'★':'☆';star.setAttribute('aria-label',(e.star?'取消收藏':'收藏')+'这一刻');star.setAttribute('aria-pressed',String(!!e.star));
+        const words=row.querySelector('.tw');if(words.textContent!==e.t)words.textContent=e.t;
+        if(row!==rowCursor)sub.insertBefore(row,rowCursor);rowCursor=row.nextElementSibling;rows.delete(e.index);
+      }
+      rows.forEach(n=>n.remove());
+    }
+    years.forEach(n=>n.remove());
+    if(!shown.length&&!root.children.length){const empty=document.createElement('li');empty.textContent='这里还没有记录。想记住的瞬间，可以点旁边的星星收藏。';root.append(empty);}
     $('#feedMore').hidden=S.feedExpanded||ages.length<=8;
     $('#feedMore button').textContent=`翻看更早的 ${Math.max(0,ages.length-8)} 个年份`;
   }
@@ -115,7 +131,7 @@
 
   function familyRows(l,birth=false){const f=l.fam;
     const parent=p=>p?`${esc((p.sei||'')+p.name)} · ${p.alive?(p.age0+l.age)+' 岁 · '+esc(p.job.title)+' · 健康 '+Math.round(p.health??75):'享年 '+(p.deathAge??p.age0+l.age)+' 岁'}`:'暂无记录';
-    return `<dt>家庭住处</dt><dd>${esc(l.house?.name||f.home)}</dd><dt>父亲</dt><dd>${parent(f.father)}</dd><dt>母亲</dt><dd>${parent(f.mother)}</dd>${birth?`<dt>家庭年收入</dt><dd>约 ${esc(E.money(f.parentHH))}</dd><dt>兄弟姐妹</dt><dd>${f.siblings.length?f.siblings.map(s=>esc((s.sei||l.name.sei)+s.name)+'（'+s.age+'岁）').join('、'):'暂时是家里唯一的孩子'}</dd>`:`<dt>学历 / 学习</dt><dd>${esc(l.eduDone||l.edu.label)}${l.edu.major?' · '+esc(l.edu.major):''}</dd><dt>伴侣</dt><dd>${esc(l.spouse?.name||l.partner?.name||'暂无')}${l.spouse?(l.spouse.union==='partnership'?' · 长期伴侣':' · 已婚'):l.partner?' · 交往中':''}</dd><dt>孩子</dt><dd>${l.kids.length?l.kids.map(k=>esc(k.name)+(k.alive===false?'（已故）':'（'+(l.age-k.birthAge)+'岁）')).join('、'):'暂无'}</dd><dt>兄弟姐妹</dt><dd>${f.siblings.length?f.siblings.map(s=>esc((s.sei||l.name.sei)+s.name)+(s.alive===false?'（已故）':'（'+(s.age+l.age)+'岁）')).join('、'):'暂无'}</dd><dt>朋友</dt><dd>${l.friends.map(p=>esc(p.role+' '+p.name)+(p.alive?'':'（已故）')).join('、')}</dd><dt>兴趣</dt><dd>${esc(l.hobbies.join('、')||'慢慢探索中')}</dd>${l.age>=6?`<dt>生活重心</dt><dd>${esc(l.focus)}</dd>`:''}`}`;
+    return `<dt>家庭住处</dt><dd>${esc(!birth&&l.flags.livingWithChild?l.flags.livingWithChild.city+' · 和'+l.flags.livingWithChild.name+'一家同住':l.house?.name||f.home)}</dd><dt>父亲</dt><dd>${parent(f.father)}</dd><dt>母亲</dt><dd>${parent(f.mother)}</dd>${birth?`<dt>家庭年收入</dt><dd>约 ${esc(E.money(f.parentHH))}</dd><dt>兄弟姐妹</dt><dd>${f.siblings.length?f.siblings.map(s=>esc((s.sei||l.name.sei)+s.name)+'（'+s.age+'岁）').join('、'):'暂时是家里唯一的孩子'}</dd>`:`<dt>学历 / 学习</dt><dd>${esc(l.eduDone||l.edu.label)}${l.edu.major?' · '+esc(l.edu.major):''}</dd><dt>伴侣</dt><dd>${esc(l.spouse?.name||l.partner?.name||'暂无')}${l.spouse?(l.spouse.union==='partnership'?' · 长期伴侣':' · 已婚'):l.partner?' · 交往中':''}</dd><dt>孩子</dt><dd>${l.kids.length?l.kids.map(k=>esc(k.name)+(k.adopted?' · 领养':'')+(k.alive===false?'（已故）':'（'+(l.age-k.birthAge)+'岁）')).join('、'):'暂无'}</dd>${l.kids.some(k=>k.grandchild)?`<dt>孙辈</dt><dd>${l.kids.filter(k=>k.grandchild).map(k=>esc(k.grandchild.name)+'（'+(l.age-k.grandchild.birthAge)+'岁）').join('、')}</dd>`:''}<dt>兄弟姐妹</dt><dd>${f.siblings.length?f.siblings.map(s=>esc((s.sei||l.name.sei)+s.name)+(s.alive===false?'（已故）':'（'+(s.age+l.age)+'岁）')).join('、'):'暂无'}</dd><dt>朋友</dt><dd>${l.friends.map(p=>esc(p.role+' '+p.name)+(p.alive?'':'（已故）')).join('、')}</dd><dt>兴趣</dt><dd>${esc(l.hobbies.join('、')||'慢慢探索中')}</dd>${l.age>=6?`<dt>生活重心</dt><dd>${esc(l.focus)}</dd>`:''}`}`;
   }
 
   function renderSide(){const l=S.life;$('#tab-fam').innerHTML=`<h3>身边的人，日常的事</h3><dl class="famlist">${familyRows(l)}</dl>`;
@@ -129,14 +145,16 @@
 
   function renderPrivate(){const l=S.life,o=E.privateOptions(l);$('#privateMatters').hidden=!o.length;if(!o.length)return;const q=l.queer;$('#privateMatters').innerHTML=`<p class="eyebrow">心里的事，按自己的节奏</p><h3>真实的自己</h3><p class="small muted">喜欢谁、向谁说，都是你自己的事。保留隐私也是一种选择。</p><div class="cn-private-actions">${o.map(x=>`<button class="ghost small" data-private="${x.id}" ${x.disabled?'disabled':''}>${esc(x.disabled?x.id==='friends'?'朋友已知情':x.id==='family'?'家人已知情':'已公开身份':x.label)}</button>`).join('')}</div>${q.out.family==='strained'?'<p class="small muted">和家人的关系还在磨合中，给彼此一点空间。</p>':''}`;}
   $('#privateMatters').onclick=e=>{const b=e.target.closest('[data-private]');if(!b)return;S.paused=true;if(E.requestPrivate(S.life,b.dataset.private)){save();const d=E.pendingDecisions(S.life)[0];if(d)showChoice(d);renderControls();}};
-  function renderAssets(){$('#assetBody').innerHTML=CNViews.assets(S.life);}
-  $('#btnAssets').onclick=()=>{if(!S.life||S.life.age<6)return;S.paused=true;closeMenus();$('#lifeMenu').open=false;renderControls();renderAssets();$('#assetDialog').showModal();};
-  $('#assetClose').onclick=()=>$('#assetDialog').close();
   let assetIntent=null;
-  $('#assetBody').onclick=e=>{const b=e.target.closest('[data-asset]');if(!b||b.disabled)return;assetIntent={action:b.dataset.asset,args:JSON.parse(b.dataset.args||'{}')};$('#assetConfirmText').textContent=b.dataset.confirm;$('#assetConfirm').showModal();};
-  $('#assetCancel').onclick=()=>{assetIntent=null;$('#assetConfirm').close();};
-  $('#assetConfirm').addEventListener('cancel',()=>{assetIntent=null;});
-  $('#assetSubmit').onclick=()=>{if(!assetIntent)return;const {action,args}=assetIntent;assetIntent=null;const result=E.transact(S.life,action,args);$('#assetConfirm').close();if(result.ok){save();renderLife();renderAssets();if(['jobSearch','wellbeing'].includes(action)){ $('#assetDialog').close(); }}toast(result.message);};
+  function clearAssetIntent(){if(assetIntent?.button){assetIntent.button.innerHTML=assetIntent.html;assetIntent.button.removeAttribute('data-confirming');assetIntent.button.removeAttribute('aria-describedby');}$('#assetInlineHint')?.remove();assetIntent=null;}
+  function renderAssets(){clearAssetIntent();$('#assetBody').innerHTML=CNViews.assets(S.life);}
+  $('#btnAssets').onclick=()=>{if(!S.life||S.life.age<6)return;S.paused=true;closeMenus();$('#lifeMenu').open=false;renderControls();renderAssets();$('#assetDialog').showModal();};
+  $('#assetClose').onclick=()=>$('#assetDialog').close();$('#assetDialog').onclose=clearAssetIntent;
+  $('#assetBody').onclick=e=>{const b=e.target.closest('[data-asset]');if(!b||b.disabled)return;
+    if(assetIntent?.button===b){const {action,args}=assetIntent;clearAssetIntent();b.disabled=true;const result=E.transact(S.life,action,args);if(result.ok){save();renderLife();}renderAssets();toast(result.message);return;}
+    clearAssetIntent();assetIntent={button:b,html:b.innerHTML,action:b.dataset.asset,args:JSON.parse(b.dataset.args||'{}')};const label=b.textContent;b.textContent='确认：'+label;b.dataset.confirming='true';
+    const hint=document.createElement('p');hint.id='assetInlineHint';hint.className='cn-inline-confirm';hint.setAttribute('role','status');hint.textContent=(b.dataset.confirm||'确认这项安排。')+' 再次点击当前按钮确认。';b.setAttribute('aria-describedby',hint.id);b.parentElement.insertBefore(hint,b.nextSibling);
+  };
   function openDocuments(){
     if(!S.life)return;S.paused=true;$('#lifeMenu').open=false;renderControls();const l=S.life;
     const records=l.choices.filter(c=>c.presentation&&c.presentation.kind!=='sheet').slice().reverse();
