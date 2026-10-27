@@ -23,8 +23,7 @@
   const metros=new Set(['北京','上海','深圳','广州']);
   const hubs=new Set(['杭州','南京','苏州','厦门','宁波','成都','武汉','西安','天津','重庆','长沙','青岛','福州','合肥','济南','郑州']);
   function cityProfile(l){
-    const big=metros.has(l.city),hub=hubs.has(l.city),small=l.rural&&!big&&!hub;
-    return {tier:big?'超大城市':hub?'区域中心城市':small?'县镇生活':'普通城市',rent:big?2800:hub?1800:small?650:1100,food:big?1450:hub?1200:small?800:1000,homePrice:big?3200000:hub?1400000:small?420000:780000};
+    return G.CNEconomy.profile(l);
   }
   function familyLabel(l){return l.wealth>.65?'条件宽裕的家庭':l.wealth<-.6?'需要精打细算的家庭':'普通的工薪家庭';}
   function parentName(r,sex,born){
@@ -32,7 +31,7 @@
     return r.pick(born>=1985?recent:old);
   }
   function normalize(l){
-    l.flags=l.flags||{};l.fam=l.fam||{};l.actions=l.actions||[];l.fam.siblings?.forEach(s=>{s.sex=s.sex||(D.given.M.includes(s.name)?'M':'F');});l.finances=l.finances||null;
+    l.flags=l.flags||{};if(l.retired&&l.focus==='事业')l.focus='平衡';l.fam=l.fam||{};l.actions=l.actions||[];l.fam.siblings?.forEach(s=>{s.sex=s.sex||(D.given.M.includes(s.name)?'M':'F');});l.finances=l.finances||null;
     l.origin=l.origin||{settlement:l.rural?'乡镇':'城区',family:familyLabel(l)};
     l.studentDebt=Math.max(0,l.studentDebt||0);l.careerYears=l.careerYears||0;l.careerIncome=l.careerIncome||0;
     for(const [k,sex] of [['father','M'],['mother','F']]){
@@ -42,7 +41,7 @@
     }
     if(l.spouse&&!Number.isFinite(l.spouse.income))l.spouse.income=Math.round(40000*(D.provinces.find(p=>p.name===l.pref)?.incomeFactor||1));
     if(l.debt>0&&!l.mortgage&&!l.properties){l.mortgage={balance:Math.max(0,l.debt-l.studentDebt),rate:0,yearsLeft:Math.max(1,Math.ceil(l.debt/18000)),annualPayment:18000,legacy:true};}
-    G.CNAssets.normalize(l);G.CNQueer.normalize(l);G.CNCareer?.normalize(l);
+    G.CNAssets.normalize(l);G.CNQueer.normalize(l);G.CNCareer?.normalize(l);G.CNSociety?.normalize(l);if(l.job&&!l.retired)l.income=Math.max(G.CNCareer.floor(l),l.income);
     return l;
   }
   function init(l){
@@ -64,20 +63,20 @@
       opt('写封回信，也说说自己的烦恼','关系 +6，心情 +3',l=>{s.social+=6;s.happy+=3;return '你写下最近吃到的饭菜、遇见的人，也说了一件不太顺心的事。信寄出去以后，心里反而踏实了。';},2),
       opt('给家里打个电话，慢慢聊一会儿','关系 +5',l=>{s.social+=5;return '电话接通时，家里传来锅铲碰到锅沿的声音。你们没聊什么大事，却都舍不得先挂断。';}),
       opt('先收好，等见面再说','心情 +2',l=>{s.happy+=2;return '你把信叠回原来的折痕里。下次回家时，想给家人带一点这里的特产。';})])];
-    if(a>=18&&a<=21&&['univ','college'].includes(l.edu.stage)&&!done.major)return [dec(l,'major','录取通知书之后：学什么？','专业会影响最初接触的岗位，但不会替你决定一辈子。课程和职业对应关系经过简化。',D.majors.filter(m=>l.edu.stage==='univ'||m.id!=='education').map(m=>opt(m.name,`${m.skill} · 影响第一份工作`,l=>{l.flags.major=m.id;l.edu.major=m.name;s.know+=4;return `你选择了${m.name}方向。开学那天，你在食堂里第一次用饭卡买了一顿饭。`;},1)))];
-    if(a===22&&l.edu.stage==='univ'&&!done.postgrad)return [dec(l,'postgrad','毕业以后，继续读还是先工作？','图书馆里的座位、招聘会上的队伍、朋友的消息，都在提醒你：又到了一个路口。',[
-      opt('尝试考研','模拟录取；录取后 25 岁毕业',l=>{if(r.chance(cap(.2+s.know/150,.2,.8))){l.eduDone='本科';l.flags.degree='硕士';l.flags.gradAge=25;l.edu.stage='grad';l.edu.label='硕士在读';s.know+=7;return '你收到了研究生录取通知。再见到熟悉的校园时，你换了一个新的身份。';}return '这次没有考上。你收好复习资料，决定先去工作，未来的路还很长。';}),
+    if(a>=18&&a<=25&&['univ','college'].includes(l.edu.stage)&&!l.edu.admission&&!done.major)return [dec(l,'major','补填专业意向','你重新确认了接下来想学的方向。',D.majors.filter(m=>l.edu.stage==='univ'||m.id!=='education').map(m=>opt(m.name,`${m.skill} · 影响第一份工作`,l=>{l.flags.major=m.id;l.edu.major=m.name;s.know+=4;return `你确认了${m.name}方向。`;},1)))];
+    if(a===(l.flags.gradAge||22)&&l.edu.stage==='univ'&&!done.postgrad)return [dec(l,'postgrad','毕业以后，继续读还是先工作？','图书馆里的座位、招聘会上的队伍、朋友的消息，都在提醒你：又到了一个路口。',[
+      opt('尝试考研','准备考试，通过后继续读三年',l=>{if(r.chance(cap(.2+s.know/150,.2,.8))){l.eduDone='本科';l.flags.degree='硕士';l.flags.gradAge=l.age+3;l.edu.stage='grad';l.edu.label='硕士在读';s.know+=7;return '你收到了研究生录取通知。再见到熟悉的校园时，你换了一个新的身份。';}return '这次没有考上。你收好复习资料，决定先去工作，未来的路还很长。';}),
       opt('先去工作，攒下自己的第一笔钱','进入求职选择',l=>'你把毕业照发给家人，然后认真改好了第一版简历。',3)])];
-    if(a>=24&&a<=28&&l.job&&!done.workStyle)return [dec(l,'workStyle','想把日子过成什么节奏？','同学群里，有人在企业，有人在基层，也有人开始自由接单。你也在衡量自己的选择。',[
-      opt('准备一次公考或事业单位考试','录取为游戏抽样；准备期支出 3,000 元',l=>{l.savings-=3000;if(r.chance(cap(.1+s.know/300,.1,.4))){getJob(l,'college',['基层公共服务岗位',1.22]);l.job.sector='civil';l.flags.workStyle='稳定';return '你通过了这次模拟招录，开始在一个基层岗位工作。稳定的日常，也有自己的忙碌。';}s.know+=4;return '你认真准备了一次考试，结果没有如愿。工作继续，学到的东西也没有白费。';}),
-      opt('继续在企业积累经验','知识 +5，收入 +8%',l=>{l.flags.workStyle='企业';s.know+=5;l.income*=1.08;return '你决定继续在企业积累经验，开始独立负责一个小项目。';},3),
-      opt('尝试接单或做小生意','收入波动更大，时间安排更自由',l=>{l.flags.workStyle='灵活就业';l.flags.flexible=true;l.job.title=l.flags.major==='design'?'自由设计师':l.job.kind==='skilled'?'技术服务接单者':r.pick(['个体经营者','电商小店经营者']);l.income*=r.chance(.6)?1.12:.78;l.job.sector='private';l.jobHist.push({age:l.age,title:l.job.title,income:Math.round(l.income)});return '你开始自己接单或经营一门小生意。有人催进度，也有人记得给你介绍新的机会。';})])];
-    if(a===35&&!done.festival)return [dec(l,'festival','春节快到了，今年怎么过？',l.pref===l.birthPref?'家人开始张罗年夜饭。':'家里问你，回程车票买好了没有。',[
+    if(a>=24&&a<=28&&l.job&&!G.CNCareer.civil(l)&&!done.workStyle)return [dec(l,'workStyle','要不要认真准备一次考公？',G.CNSociety.parentsAlive(l)?'家人问起你今后的打算，也问你是否考虑考公。你想了想眼下的工作与生活。':'你开始重新考虑未来：继续现在的工作，还是留一年时间准备考试？',[
+      opt('全职准备一次考公','准备支出 3,000 元；今年辞职备考，明年公布结果',l=>G.CNCareer.prepareExam(l)),
+      opt('继续现在的工作','保持现有岗位',l=>{l.flags.workStyle='企业';return '你决定继续在企业积累经验，开始独立负责一个小项目。';},3),
+      opt('尝试接单或做小生意','收入波动更大，时间安排更自由',l=>{l.flags.workStyle='灵活就业';l.flags.flexible=true;l.job.title=l.flags.major==='design'?'自由设计师':l.job.kind==='skilled'?'技术服务接单者':r.pick(['个体经营者','电商小店经营者']);l.job.sector='private';l.jobHist.push({age:l.age,title:l.job.title,income:Math.round(l.income)});return '你开始自己接单或经营一门小生意。有人催进度，也有人记得给你介绍新的机会。';})])];
+    if(a===35&&G.CNSociety.parentsAlive(l)&&!done.festival)return [dec(l,'festival','春节快到了，今年怎么过？',l.pref===l.birthPref?'家人开始张罗年夜饭。':'家里问你，回程车票买好了没有。',[
       opt('回家吃一顿团圆饭','花费 1,200 元，关系 +8',l=>{l.savings-=1200;s.social+=8;s.happy+=4;return '你把行李放在门口，熟悉的饭菜已经摆上桌。饭后，家人又往你的包里塞了很多东西。';},3),
       opt('留在现在的城市，和朋友一起过','花费 600 元，心情 +6',l=>{l.savings-=600;s.happy+=6;return '你和朋友一起包饺子、做年夜饭，也给家人打了一个长长的视频电话。';}),
-      opt('安排工作，把团聚放在错峰假期','收入 +2%，关系 +2',l=>{l.income*=1.02;s.social+=2;return '你选择错峰回家。人少一点，陪家人说话的时间反而多了一点。';})])];
+      opt('安排工作，把团聚放在错峰假期','关系 +2',l=>{s.social+=2;return '你选择错峰回家。人少一点，陪家人说话的时间反而多了一点。';})])];
     if(a>=46&&a<=55&&(l.fam.father.alive||l.fam.mother.alive)&&!done.care)return [dec(l,'care','父母老了，怎么安排照应？','一次普通的检查之后，你们开始认真谈论以后谁来陪诊、日常怎么联系。',[
-      opt('多留一些时间陪伴','收入 -5%，关系 +10，减少照护支出',l=>{l.flags.care='time';l.income*=.95;s.social+=10;return '你把家人的号码设在快捷拨号里，也尽量给陪诊和探望留出时间。';},2),
+      opt('多留一些时间陪伴','关系 +10，减少照护支出',l=>{l.flags.care='time';s.social+=10;return '你把家人的号码设在快捷拨号里，也尽量给陪诊和探望留出时间。';},2),
       opt('和家人一起分担照护费用','每年预留 4,800 元，关系 +5',l=>{l.flags.care='service';s.social+=5;return '你们商量好分工，安排定期探望，也预留了一笔照护费用。';}),
       opt('保持联系，先建立应急安排','关系 +3，保留工作节奏',l=>{l.flags.care='contact';s.social+=3;return '你和家人写下了应急联系人，也约好每周好好通一次电话。';})])];
     return null;
@@ -86,30 +85,31 @@
     const p=cityProfile(l),s=l.stats,price=p.homePrice,down=Math.round(price*.3),loan=price-down,rate=.035,years=25;
     const annual=Math.round(loan*rate/(1-Math.pow(1+rate,-years)));
     const money=G.CNEngine.money;
-    return dec(l,'housing','想在哪里安一个家？',`你在${l.city}看了看住处。这里用${p.tier}的游戏价格档位估算，并非当地实际房价或贷款报价。`,[
+    return dec(l,'housing','想在哪里安一个家？',`你在${l.city}看了看住处，认真比较租金、房价和自己的积蓄。`,[
       opt('按预算购买一套普通住房',`总价约 ${money(price)}，首付 ${money(down)}，手续费 ${money(Math.round(price*.02))}；年还款约 ${money(annual)}`,l=>{
         if(l.savings<down+Math.round(price*.02))return '算过首付和应急金，你决定暂时不买房。把日子过稳，比赶一个时间表更重要。';
         const result=G.CNAssets.transact(l,'buyHome',{size:'small',mode:'loan',use:'self'},()=>{});if(!result.ok)return result.message;s.happy+=5;return `你在${l.city}安下一个家。收房那天，屋子还空着，你先认真量了窗帘的尺寸。`;
       },l.savings>=down+Math.round(price*.02)?2:0),
-      opt('继续租住，把余地留给未来',`租金模型约 ${money(p.rent)} / 月`,l=>{l.flags.livesWithParents=false;s.happy+=3;return '你继续租住，给自己留下一笔储备。添上一盏喜欢的灯，屋子就又像家了一点。';},2),
-      opt('回到家乡，重新安排生活','调整城市档位；回乡后在家庭住处过渡',l=>{const moved=l.pref!==l.birthPref||l.city!==l.birthCity;l.pref=l.birthPref;l.city=l.birthCity;l.rural=l.origin.settlement!=='城区';l.flags.livesWithParents=true;if(moved)l.trail.push({age:l.age,pref:l.pref,city:l.city});G.CNAssets.sync(l);l.income*=.85;s.social+=8;return `你回到${l.city}。熟悉的小店还在，你决定给自己一点时间，把新的生活慢慢安顿下来。`;})
+      opt('继续租住，把余地留给未来',`租金 ${money(p.rent)} / 月`,l=>{l.flags.livesWithParents=false;s.happy+=3;return '你继续租住，给自己留下一笔储备。添上一盏喜欢的灯，屋子就又像家了一点。';},2),
+      opt('回到家乡，重新安排生活','回到家乡后，重新寻找工作',l=>{G.CNCareer.relocate(l,l.birthPref,l.birthCity);s.social+=8;return `你回到${l.city}。熟悉的小店还在，你决定给自己一点时间，把新的生活慢慢安顿下来。`;})
     ]);
   }
   function year(l,{log}){
     normalize(l);const p=cityProfile(l),a=l.age,r=l.r;
-    const study=l.flags.furtherStudy;if(study&&a>study.startAge&&a<=study.finishAge){l.stats.know+=2;if(a===study.finishAge){l.eduDone=study.target;l.flags.degree=study.target;log(l,'school',`你完成了这段继续教育，获得了游戏中的${study.target}学历。持续学习也让你更有底气。`,'good','继续教育的年限、费用和结业条件为游戏设定。');delete l.flags.furtherStudy;}}
-    if(l.job&&!l.retired){l.careerYears++;l.careerIncome+=l.income;if(l.flags.flexible)l.income*=cap(r.norm(1,.12),.7,1.35);}
+    const study=l.flags.furtherStudy;if(study&&a>study.startAge&&a<=study.finishAge){l.stats.know+=.5;if(a===study.finishAge){l.eduDone=study.target;l.flags.degree=study.target;log(l,'school',`你完成了这段继续教育，获得了${study.target}学历。持续学习也让你更有底气。`,'good','继续教育的年限、费用和结业条件为游戏设定。');delete l.flags.furtherStudy;}}
+    if(l.job&&!l.retired){l.income=Math.max(G.CNCareer.floor(l),l.income);l.careerYears++;l.careerIncome+=l.income;}
     if(l.retired&&!l.flags.pensionCalculated){const avg=l.careerYears?l.careerIncome/l.careerYears:48000;l.income=Math.round(cap(avg*.4,14000,65000));l.flags.pensionCalculated=true;}
     if(l.spouse)l.spouse.income=Math.round((l.spouse.income||40000)*1.015);
-    let support=0,tuition=0,pay=Math.round(l.income*(l.job&&!l.retired?.84:1));
+    let support=0,tuition=0,pay=G.CNEconomy.takeHome(l);
     const spousePay=l.spouse?Math.round(l.spouse.income*(a<62?.84:.5)*.65):0;
     const studying=a>=18&&['univ','college','grad'].includes(l.edu.stage)&&a<(l.flags.gradAge||22)&&!l.job;
-    const independent=a>=18&&!l.flags.livesWithParents;
+    const dependent=a<18||a===18&&!l.done.further;
+    const independent=!dependent&&!l.flags.livesWithParents;
     const rent=studying?6000:l.house||!independent?0:p.rent*12;
-    const daily=a<18?0:Math.round(p.food*12*(l.spouse?1.6:1)*(l.flags.livesWithParents?.65:1));
+    const daily=dependent?0:Math.round(p.food*12*(l.spouse?1.6:1)*(l.flags.livesWithParents?.65:l.retired?.8:1));
     const children=l.kids.filter(k=>a-k.birthAge<22).reduce((sum,k)=>sum+(a-k.birthAge<6?12000:a-k.birthAge<18?9000:16000),0);
     const care=(l.fam.father.alive||l.fam.mother.alive)?(l.flags.care==='service'?4800:l.flags.care==='time'?1800:0):0;
-    if(studying){tuition=l.edu.stage==='grad'?10000:8000;support=Math.min(tuition+daily+rent,Math.round(l.fam.parentHH*.2));const shortage=Math.max(0,tuition+daily+rent-support);l.studentDebt+=shortage;}
+    if(studying){tuition=l.edu.stage==='grad'?10000:8000;support=G.CNSociety.parentsAlive(l)?Math.min(tuition+daily+rent,Math.round(l.fam.parentHH*.2)):0;const shortage=Math.max(0,tuition+daily+rent-support);l.studentDebt+=shortage;}
     const assets=G.CNAssets.year(l,log),{principal,interest,mortgagePay,rentalIncome,propertyCost,carCost,valueChange}=assets;
     let studentPay=0;if(!studying&&l.income>0&&l.studentDebt>0){studentPay=Math.min(l.studentDebt,Math.round(l.income*.08));l.studentDebt-=studentPay;}
     const expense=daily+rent+children+care+tuition+mortgagePay+studentPay+propertyCost+carCost;
@@ -117,22 +117,22 @@
     const balance=a>=18?pay+spousePay+support+loanFunding+rentalIncome-expense:0;
     l.savings+=balance;G.CNAssets.sync(l);
     l.finances={year:l.year,gross:Math.round(l.income),pay,spousePay,support,daily,rent,children,care,tuition,mortgagePay,principal,interest,studentPay,loanFunding,rentalIncome,propertyCost,carCost,valueChange,expense,balance,model:true};
-    if(a>=18&&(a===18||a%5===0))log(l,'money',`${l.year} 年的家庭账本：到账约${G.CNEngine.money(pay+spousePay+support+rentalIncome)}，生活和还款约${G.CNEngine.money(expense)}。${balance>=0?'本年结余':'本年收支缺口'}约${G.CNEngine.money(Math.abs(balance))}。`,'neutral','薪酬扣除、伴侣共同生活投入、租金、学费、照护和借款均为游戏估算，不对应真实政策或金融合同。');
+    if(a>=18&&(a===18||a%5===0))log(l,'money',`${l.year} 年的家庭账本：到账约${G.CNEngine.money(pay+spousePay+support+rentalIncome)}，生活和还款约${G.CNEngine.money(expense)}。${balance>=0?'本年结余':'本年超支'}约${G.CNEngine.money(Math.abs(balance))}。`,'neutral','薪酬扣除、伴侣共同生活投入、租金、学费、照护和借款均为游戏估算，不对应真实政策或金融合同。');
     if(studying&&loanFunding>0&&a===(l.flags.gradAge||22)-1)log(l,'school','家里尽力支持你，剩下的求学费用先记为教育借款。你打算工作后慢慢还。','neutral');
     if(a===1)log(l,'family','周岁那天，家人给你拍了一张全家福。你还不明白什么是生日，只觉得今天很热闹。','good');
     if(a===16&&l.edu.stage==='voc')log(l,'school','实训课上，你第一次独立完成了一道工序。老师说，认真做事也是一种本事。','good');
     if(a===19&&['univ','college','grad'].includes(l.edu.stage))log(l,'school','你住进宿舍，在食堂排队，在社团招新时犹豫，也开始和来自不同地方的人做朋友。','good');
     if(a>=18&&a%12===0){const c=culture[l.birthPref];log(l,'story',`一个想家的晚上，你忽然想吃${c[1]}。记忆里还有${c[2]}。`);}
-    if(a>=20&&a%11===0&&l.pref!==l.birthPref)log(l,'family','你订好了回家的车票。车窗外的景色越来越熟悉，家人的消息也越来越密。','good');
+    if(a>=20&&a%11===0&&l.pref!==l.birthPref&&G.CNSociety.parentsAlive(l))log(l,'family','你订好了回家的车票。车窗外的景色越来越熟悉，家人的消息也越来越密。','good');
     l.fam.siblings.forEach(s=>{const sa=s.age+a;if(sa===18)log(l,'family',`家里的${s.sei||l.name.sei}${s.name}也成年了。饭桌上，你们开始聊起各自的打算。`);});
   }
   function contextualStory(l,group,pool){
     const c=culture[l.pref]||culture[l.birthPref],a=l.age;
-    if(a>=6&&a%7===0)return `放假的早晨，你和家人去了${c[0]}。${c[1]}端上来时，你觉得这就是熟悉的生活。`;
+    if(a>=6&&a%7===0)return `放假的早晨，你和${G.CNSociety.companion(l)}去了${c[0]}。${c[1]}端上来时，你觉得这就是熟悉的生活。`;
     if(a>=22&&l.job&&a%6===0)return l.flags.flexible?'你接到一位老客户的新订单。忙完以后，你给自己留了半天休息。':'下班后的路上，你顺手买了点菜。到家开灯的那一刻，忙碌的一天慢慢落下来了。';
-    if(a>=18&&!l.job&&!l.retired&&['univ','college','grad'].includes(l.edu.stage)&&a%2===0)return '期末周，图书馆很早就坐满了人。你和室友约好，交完最后一份作业后一起吃顿好的。';
+    if(a>=18&&!l.job&&!l.retired&&['univ','college','grad'].includes(l.edu.stage)&&a<(l.flags.gradAge||22)&&a%2===0)return '期末周，图书馆很早就坐满了人。你和室友约好，交完最后一份作业后一起吃顿好的。';
     if(a<18&&!['hs','univ','college'].includes(l.edu.stage)&&group==='teen')pool=pool.filter(t=>!t.includes('晚自习')&&!t.includes('毕业'));
-    return l.r.pick(pool);
+    const text=l.r.pick(pool),who=G.CNSociety.companion(l);return text.replaceAll('家人',who).replaceAll('家里人',who).replaceAll('家庭群',G.CNSociety.hasFamily(l)?'家庭群':'朋友群').replaceAll('老朋友',l.friends.some(f=>f.alive)?'老朋友':'邻居');
   }
   function actionOptions(l){
     if(!l.alive)return [];
@@ -149,7 +149,7 @@
     const fail=message=>({ok:false,message});if(!l.alive||l.age<6)return fail('上小学以后，才会有自己的花钱安排。');
     const record=(text,cost)=>{l.savings-=cost;if(l.finances?.year===l.year){l.finances.other=(l.finances.other||0)+cost;l.finances.expense+=cost;l.finances.balance-=cost;}log(l,'money',text,'good','课程、迁居费用与学历变化均为游戏设定。');};
     if(action==='study'){
-      const classes={reading:{name:'读书与兴趣课程',cost:l.age<18?0:300,know:1},skill:{name:'职业技能课程',cost:4000,know:3},degree:{name:'继续教育深造',cost:20000,know:1}},course=classes[args.id];
+      const classes={reading:{name:'读书与兴趣课程',cost:l.age<18?0:300,know:.2},skill:{name:'职业技能课程',cost:4000,know:.5},degree:{name:'继续教育深造',cost:20000,know:.2}},course=classes[args.id];
       if(!course||l.age<18&&args.id!=='reading')return fail('这个阶段还不能报名该课程。');
       if(l.flags.studyYear===l.age)return fail('这一年的课程已经安排好了。');
       if(args.id==='degree'&&(l.retired||l.flags.furtherStudy||['univ','college','grad'].includes(l.edu.stage)&&!l.job))return fail('目前已有学习安排，或暂不适合报名。');
@@ -158,12 +158,23 @@
       l.flags.studyYear=l.age;l.stats.know+=course.know;
       if(args.id==='degree')l.flags.furtherStudy={startAge:l.age,finishAge:l.age+3,target:/本科|硕士/.test(l.eduDone||'')?'硕士':/大专/.test(l.eduDone||'')?'本科':'大专'};
       record(l.age<18?'家人给你报了一门读书与兴趣课程。你翻开新的书，也认识了新的朋友。':`你花费 ${G.CNEngine.money(course.cost)} 报名${course.name}${args.id==='degree'?'，接下来三年继续学习，学费已一次付清':'，开始认真学一点新东西'}。`,course.cost);
+    }else if(action==='wellbeing'){
+      const services={gym:{name:'健身房月卡',cost:180,age:16,health:.8,happy:.5},checkup:{name:'年度体检',cost:600,age:18,health:.6,happy:.3},parents:{name:'父母体检',cost:600*[l.fam.father,l.fam.mother].filter(p=>p.alive).length,age:18},match:{name:'相亲见面',cost:300,age:20}};
+      const service=services[args.id];if(!service||l.age<service.age)return fail('现在还不能安排这项活动。');
+      if(l.flags['service_'+args.id]===l.age)return fail('今年已经安排过这项活动。');
+      if(args.id==='parents'&&!G.CNSociety.parentsAlive(l))return fail('父母已经离世，不能再安排体检。');
+      if(args.id==='match'&&(l.partner||l.spouse||l.romance?.candidate))return fail('先认真处理眼前的感情，再考虑新的相识。');
+      if(l.savings<service.cost)return fail('积蓄不足，先留一些钱给日常生活。');
+      l.flags['service_'+args.id]=l.age;l.stats.health+=service.health||0;l.stats.happy+=service.happy||0;
+      if(args.id==='parents')for(const p of [l.fam.father,l.fam.mother])if(p.alive)p.health=Math.min(100,p.health+10);
+      if(args.id==='match')G.CNSociety.meet(l,'相亲见面');
+      record(`你花费 ${G.CNEngine.money(service.cost)} 安排了${service.name}。${args.id==='parents'?'你陪家人取回报告，提醒他们按时复查。':args.id==='match'?`你和${l.romance.candidate.name}见了面，接下来是否交往，由你决定。`:'你给自己的身体和心情留出了一点照顾。'}`,service.cost);
     }else if(action==='moveCity'){
       if(l.age<18)return fail('成年以后，可以自己决定迁居。');const province=D.provinces.find(p=>p.name===args.pref);if(!province||!province.cities.includes(args.city))return fail('请选择有效的城市。');
       if(l.pref===args.pref&&l.city===args.city)return fail('你已经住在这里。');if(l.flags.moveYear===l.age)return fail('先在新的城市安顿下来，明年再考虑搬家。');
       const destination={...l,pref:args.pref,city:args.city,rural:false},cost=Math.round(1800+cityProfile(destination).rent*2);
       if(l.savings<cost)return fail('结余不足以支付搬迁和安置费用。');
-      if(l.job){G.CNCareer?.normalize(l);l.employment.search={since:l.age,kind:l.job.kind,previousIncome:l.income};l.job=null;l.income=0;l.edu.label='寻找新的工作';}
+      if(!l.retired)G.CNCareer.leave(l);
       l.properties.filter(p=>p.use==='self').forEach(p=>p.use='vacant');l.pref=args.pref;l.city=args.city;l.rural=false;l.flags.livesWithParents=false;l.flags.moveYear=l.age;l.trail.push({age:l.age,pref:l.pref,city:l.city});G.CNAssets.sync(l);
       record(`你花费 ${G.CNEngine.money(cost)} 搬到${l.city}并安顿下来。原有自住房暂时空置，工作需要在新城市重新寻找。`,cost);
     }else return fail('未知的生活安排。');
@@ -171,7 +182,7 @@
   }
   function act(l,id,log){const o=actionOptions(l).find(o=>o.id===id);if(!o||o.disabled)return false;const s=l.stats;
     if(o.cost&&l.age>=18){l.savings-=o.cost;if(l.finances){l.finances.other=(l.finances.other||0)+o.cost;l.finances.expense+=o.cost;l.finances.balance-=o.cost;}}
-    const effects={exercise:{health:3,happy:1},read:{know:3,happy:1},family:{social:4,happy:2},travel:{happy:6},skill:{know:6},rest:{health:2,happy:4}};
+    const effects={exercise:{health:3,happy:1},read:{know:.2,happy:1},family:{social:4,happy:2},travel:{happy:6},skill:{know:.5},rest:{health:2,happy:4}};
     for(const[k,v]of Object.entries(effects[id]))s[k]=Math.min(100,s[k]+v);
     const text={exercise:'你给自己留出时间活动身体，回来以后精神好了一点。',read:'你关掉手机，认真读了几页书，又学会了一点新东西。',family:'你和家人好好聊了一会儿。没有什么大事，但彼此都安心了一点。',travel:'你暂时离开熟悉的日常，出去走了走，带着一点新鲜感回来。',skill:'你报名上一门技能课，把学到的东西一点点用在生活和工作里。',rest:'你把能推迟的事暂时放下，认真休息了一天。'};
     l.actions.push({age:l.age,id,label:o.label});log(l,'action',text[id],'good');return true;}

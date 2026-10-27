@@ -5,6 +5,7 @@ require('../cn-data.js');
 require('../cn-assets.js');
 require('../cn-queer.js');
 require('../cn-career.js');
+for(const f of ['cn-economy','cn-education','cn-society','cn-city-stories'])require('../'+f+'.js');
 require('../cn-local.js');
 require('../cn-engine.js');
 const E = global.CNEngine;

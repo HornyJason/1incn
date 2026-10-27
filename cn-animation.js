@@ -7,7 +7,7 @@
   const pxDpr=()=>Math.min(3,Math.max(2,Math.round(devicePixelRatio||1)));
   function pxSnap(g){g.imageSmoothingEnabled=false;}
   const HOBBY_ACT=[[/运动/,'run'],[/阅读/,'read'],[/艺术/,'guitar'],[/旅行/,'walk']];
-  const ACT_LABEL={love:'心动',baby:'照顾孩子',celebrate:'值得庆祝',sick:'休养中',sad:'整理心情',money:'收支变化',travel:'在路上',move:'搬家',talk:'聊聊天',walk:'和家人散步',sleep:'休息中',idle:'普通的一天',game:'玩一会儿',read:'读书',guitar:'练习音乐',sing:'唱首歌',lift:'锻炼',run:'跑步',fish:'钓鱼',golf:'运动',cook:'下厨',photo:'拍照',garden:'照料花草',dance:'跳舞',phone:'看看消息',cheer:'加油',camp:'露营',shogi:'下棋',tea:'喝杯茶',knit:'做点手工',tv:'看看电视',ball:'课间活动',study:'学习中',work:'工作中',crawl:'慢慢长大',play:'玩耍'};
+  const ACT_LABEL={love:'心动',baby:'照顾孩子',celebrate:'值得庆祝',sick:'休养中',sad:'整理心情',money:'收支变化',travel:'在路上',move:'搬家',talk:'聊聊天',walk:'散步',sleep:'休息中',idle:'普通的一天',game:'玩一会儿',read:'读书',guitar:'练习音乐',sing:'唱首歌',lift:'锻炼',run:'跑步',fish:'钓鱼',golf:'运动',cook:'下厨',photo:'拍照',garden:'照料花草',dance:'跳舞',phone:'看看消息',cheer:'加油',camp:'露营',shogi:'下棋',tea:'喝杯茶',knit:'做点手工',tv:'看看电视',ball:'课间活动',study:'学习中',work:'工作中',crawl:'慢慢长大',play:'玩耍'};
   const PX_SCENE={q:[],act:'walk',t:0,until:0,x:60,dir:1,tx:120,raf:0,last:0,key:'',grid:null};
   const interval=()=>4000;
   const PROPS = {
@@ -61,8 +61,8 @@
     const out=[],base={stats:{happy:72,health:80,know:40},alive:true,flags:{},hobbies:[],year:l.year};
     const person=(age,sex,name,side)=>({...base,age,sex,name,edu:{stage:age<6?'baby':age<12?'elem':age<15?'jhs':age<18?'hs':'work'},job:null,retired:age>=65,side,outfit:casualWear(sex,l.year+age)});
     const partner=l.spouse||l.partner;if(partner&&partner.alive!==false)out.push(person(Math.max(18,l.age+(partner.ageDiff||0)),partner.sex||(l.sex==='M'?'F':'M'),partner.name,'ahead'));
-    l.kids.filter(k=>l.age-k.birthAge<22).slice(0,3).forEach(k=>out.push(person(l.age-k.birthAge,k.sex,k.name,'behind')));
-    if(l.age<18||l.flags.livesWithParents){for(const[k,sex]of [['father','M'],['mother','F']]){const p=l.fam[k];if(p.alive)out.push(person(p.age0+l.age,sex,p.sei+p.name,k==='father'?'ahead':'behind'));}l.fam.siblings.filter(k=>k.age+l.age<22).slice(0,2).forEach(k=>out.push(person(k.age+l.age,k.sex||'F',(k.sei||l.name.sei)+k.name,'behind')));}
+    l.kids.filter(k=>k.alive!==false&&l.age-k.birthAge<22).slice(0,3).forEach(k=>out.push(person(l.age-k.birthAge,k.sex,k.name,'behind')));
+    if(l.age<18||l.flags.livesWithParents){for(const[k,sex]of [['father','M'],['mother','F']]){const p=l.fam[k];if(p.alive)out.push(person(p.age0+l.age,sex,p.sei+p.name,k==='father'?'ahead':'behind'));}l.fam.siblings.filter(k=>k.alive!==false&&k.age+l.age<22).slice(0,2).forEach(k=>out.push(person(k.age+l.age,k.sex||'F',(k.sei||l.name.sei)+k.name,'behind')));}
     return out;
   }
   function pxBack(g, l, W, ground, T) {

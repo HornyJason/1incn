@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict'),fs=require('node:fs');
-for(const f of ['data','engine','cn-data','cn-assets','cn-queer','cn-career','cn-local','cn-engine','cn-views'])require('../'+f+'.js');
+for(const f of ['data','engine','cn-data','cn-economy','cn-education','cn-society','cn-city-stories','cn-assets','cn-queer','cn-career','cn-local','cn-engine','cn-views'])require('../'+f+'.js');
 const E=CNEngine,date='2026-10-23T12:00:00+08:00',make=seed=>E.createLife({seed,date,pref:'北京市',sex:'M'});
 function adult(seed=803){const l=make(seed);l.age=30;l.year=l.born.y+30;l.savings=10000000;l.income=200000;l.done={social:true,workStyle:true};l.flags.livesWithParents=false;l.finances={year:l.year,balance:0,expense:0};return l;}
 const l=adult(),start=l.savings,net0=E.assetTotals(l).netWorth;

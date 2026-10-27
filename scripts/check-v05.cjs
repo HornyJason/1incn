@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-for(const f of ['data','engine','cn-data','cn-assets','cn-queer','cn-career','cn-local','cn-engine','cn-playback','cn-views','cn-interactions'])require('../'+f+'.js');
+for(const f of ['data','engine','cn-data','cn-economy','cn-education','cn-society','cn-city-stories','cn-assets','cn-queer','cn-career','cn-local','cn-engine','cn-playback','cn-views','cn-interactions'])require('../'+f+'.js');
 const E=CNEngine;
 function life(seed=25,age=30){const l=E.createLife({seed,date:'2026-10-27T12:00:00+08:00',pref:'北京市'});l.age=age;l.year=l.born.y+age;l.started=true;l.savings=200000;l.income=120000;l.edu={stage:'work',label:'工作'};l.eduDone='本科';l.job={title:'企业职员',kind:'college',sector:'private',sinceAge:25,salaryHistory:[120000]};l.finances={year:l.year,gross:120000,pay:100800,spousePay:0,balance:0,expense:0};return l;}
 const child=life(1,5),before=E.serialize(child);assert.equal(E.transact(child,'study',{id:'reading'}).ok,false);assert.deepEqual(E.serialize(child),before);
@@ -20,6 +20,6 @@ assert.equal(CNPlayback.limit(timeline),start);CNPlayback.update(timeline,.26);a
 CNPlayback.update(restored,.51);assert.equal(CNPlayback.limit(restored),start+2);CNPlayback.update(restored,1);assert.equal(CNPlayback.limit(restored),start+3);CNPlayback.finish(restored);assert.ok(restored.log.every((_,i)=>CNPlayback.visible(restored,i)));
 const invalid=E.serialize(timeline);invalid.playback.end=99999;assert.throws(()=>E.hydrate(invalid));
 for(const seed of [1,2]){const l=life(seed,12);l.done={schoolLife:true,interest:true};l.queer.enabled=false;const d=E.pendingDecisions(l).find(d=>d.id==='schoolLetter');assert.ok(d);const before=E.serialize(l),p=CNInteractions.describe(l,d);assert.equal(p.kind,seed%2?'letter':'notice');if(seed%2===0)assert.equal(p.doc,'毕业同学录');assert.deepEqual(E.serialize(l),before);E.resolve(l,d,0);l.choices.at(-1).presentation=p;assert.deepEqual(E.hydrate(E.serialize(l)).choices.at(-1).presentation,p);}
-const learner=life(3,10);learner.done={schoolLife:true};learner.queer.enabled=false;const interest=E.pendingDecisions(learner).find(d=>d.id==='interest');assert.ok(interest);const initialKnow=learner.stats.know;assert.equal(interest.options[1].hint,'知识 +3');E.resolve(learner,interest,1);assert.equal(learner.stats.know-initialKnow,3);
+const learner=life(3,10);learner.done={schoolLife:true};learner.queer.enabled=false;const interest=E.pendingDecisions(learner).find(d=>d.id==='interest');assert.ok(interest);const initialKnow=learner.stats.know;assert.equal(interest.options[1].hint,'知识 +1');E.resolve(learner,interest,1);assert.equal(learner.stats.know-initialKnow,1);
 console.log(`通过 0.5：学龄限制、课程结算与三年毕业、迁居与重新求职、N+1 到账、防重复赔偿、拖欠协商、公职隔离、年内逐条展示与进度恢复。`);
 console.log(`1500 对种子：低/高知识收入下降 ${lowDown}/${highDown}，裁员 ${lowLayoff}/${highLayoff}；低/高学历赔偿拖欠 ${lowWithheld}/${highWithheld}。`);

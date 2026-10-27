@@ -275,6 +275,14 @@ header.top { gap:8px; }
 #life .lifebar-wrap { margin-top:0; padding-top:0; top:var(--hdr-h,57px); }
 .letterwrap .ltpaper { border-bottom-left-radius:0; border-bottom-right-radius:0; position:relative; z-index:0; }
 .letterwrap .phopts { margin-top:0; border-top-left-radius:0; border-top-right-radius:0; position:relative; z-index:1; }
+.letterwrap.letter-complete .ltpaper { border-bottom-left-radius:12px; border-bottom-right-radius:12px; }
+#feed li { animation:none; }
+.controls.cn-controls { align-items:center; }
+.controls.cn-controls>button,.controls.cn-controls>details>summary { min-height:42px; box-sizing:border-box; padding:8px 15px; font-size:13px; line-height:24px; }
+.controls.cn-controls .cn-focus-control { display:flex; gap:8px; align-items:center; margin:0; }
+#mobileDetails { margin-left:auto; }
+#mobileDetailsCompact { display:none; }
+@media(max-width:540px){#mobileDetails { display:none; }#mobileDetailsCompact { display:block; }.controls.cn-controls { flex-wrap:wrap; }.controls.cn-controls .cn-focus-control { gap:4px; }.controls.cn-controls .cn-focus-control>span { font-size:12px; }}
 @media(max-width:600px){
   header.top { padding:9px 10px; gap:5px; }
   .brand-num { font-size:17px; }.brand-sub { font-size:11px; }

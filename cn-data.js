@@ -37,8 +37,11 @@
       skilled:[['设备维修技师',1.35],['护理人员',1.2],['电气技术员',1.4],['烘焙师',1.1],['数控技术员',1.3],['电商运营',1.25]],
       college:[['软件工程师',2.1],['中小学教师',1.35],['财务人员',1.3],['产品设计师',1.6],['土木工程师',1.5],['行政职员',1.15],['医务人员',1.6],['科研助理',1.45]]
     },
-    focus: {'平衡':{},'学习':{know:.45,happy:-.25},'健康':{health:1.4,happy:.3},'事业':{know:.15,health:-.6,happy:-.3},'家人':{social:1.4,happy:.8},'兴趣':{happy:1.3,know:.1}},
+    focus: {'平衡':{},'学习':{know:.08,happy:-.25},'健康':{health:1.4,happy:.3},'事业':{know:0,health:-.6,happy:-.3},'家人':{social:1.4,happy:.8},'兴趣':{happy:1.3,know:.02}},
     sources: [
+      {title:'2025 年城镇单位就业人员平均工资',url:'https://www.stats.gov.cn/sj/zxfb/202605/t20260515_1963707.html',use:'以区域工资统计作为薪资锚点，城市、岗位、学校系数与录用概率仍为游戏参数。'},
+      {title:'截至 2026 年 10 月 1 日各地区最低工资表（政府转载）',url:'https://www.huaishang.gov.cn/zfxxgk/public/29611/53380912.html',use:'省内第一档作为保守下限，深圳单列。完整口径与金额限制见源码 ECONOMY.md。'},
+      {title:'中华人民共和国劳动合同法',url:'https://www.samr.gov.cn/zw/zfxxgk/fdzdgknr/bgt/art/2023/art_0abfdd261c03417b949df19d869add8d.html',use:'经济补偿按工龄与离职前工资计算，高薪按三倍基数及十二年限制；本场景为单位提出协商解除并另付一个月补助。地区平均工资代理值仍有简化。'},
       {title:'第七次全国人口普查公报：地区人口',url:'https://www.stats.gov.cn/sj/tjgb/rkpcgb/',use:'2020 年各省常住人口，用作出生地区抽样的近似权重；不是各省年度出生人数。'},
       {title:'2025 年国民经济和社会发展统计公报',url:'https://www.stats.gov.cn/xxgk/sjfb/tjgb2020/202602/t20260228_1962662.html',use:'全国人口、年度出生和死亡总数、人均可支配收入。首页计数器是按年总量推算的估计值。'},
       {title:'阿里云 DataV 地理数据',url:'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json',use:'本地保存的省级地图轮廓。出生抽样范围为内地 31 个省、自治区和直辖市。'}

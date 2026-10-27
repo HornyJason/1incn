@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-for(const f of ['data','engine','cn-data','cn-assets','cn-queer','cn-career','cn-local','cn-engine','cn-interactions'])require('../'+f+'.js');
+for(const f of ['data','engine','cn-data','cn-economy','cn-education','cn-society','cn-city-stories','cn-assets','cn-queer','cn-career','cn-local','cn-engine','cn-interactions'])require('../'+f+'.js');
 const E=CNEngine,make=seed=>E.createLife({seed,date:'2026-10-27T12:00:00+08:00'});
 for(const [age,id] of [[12,'schoolLetter'],[19,'homeLetter']]){
   const l=make(13);l.age=age;l.year=l.born.y+age;
@@ -20,7 +20,7 @@ for(const [age,id] of [[12,'schoolLetter'],[19,'homeLetter']]){
   assert.throws(()=>E.hydrate(bad),/存档格式/,'导入时拒绝损坏的来信字段');
 }
 const l=make(27),d={title:'<重要决定>',text:'<原文>',options:[{i:0,label:'<选项>',hint:'提示'}]};
-for(const [id,kind] of Object.entries({interest:'line',schoolLife:'notice',zhongkao:'exam',further:'exam',major:'notice',postgrad:'exam',jobEntry:'mail',social:'line',festival:'call',care:'call',marriage:'sign',housing:'sign',career:'sign',retirement:'sign',commitment:'letter',later:'letter',queerCrush:'letter',sameConfession:'line',out_family:'line'})){
+for(const [id,kind] of Object.entries({interest:'line',schoolLife:'notice',zhongkao:'exam',further:'exam',major:'exam',postgrad:'exam',jobEntry:'mail',social:'line',festival:'call',care:'call',marriage:'sign',housing:'sign',career:'sign',retirement:'sign',commitment:'letter',later:'letter',queerCrush:'letter',sameConfession:'line',out_family:'line'})){
   const p=CNInteractions.describe(l,{...d,id});assert.equal(p.kind,kind);assert.equal(p.options[0].label,'<选项>');
 }
 assert.equal(CNInteractions.esc('<img src=x onerror="bad">'),'&lt;img src=x onerror=&quot;bad&quot;&gt;');

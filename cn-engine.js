@@ -25,7 +25,7 @@
       name:{sei:r.pick(D.surnames),mei:r.pick(D.given[sex])},sex,pref:p.name,city,birthPref:p.name,birthCity:city,
       born:{y:date.getFullYear(),m:date.getMonth()+1,d:date.getDate(),weight:clamp(r.norm(3.2,.4),1.8,4.5),place:rural?'县人民医院':'市妇幼保健院'},
       year:date.getFullYear(),age:0,alive:true,era:'modern',rural,wealth,
-      stats:{health:clamp(r.norm(85,6)),happy:clamp(r.norm(74,8)),know:3,social:clamp(r.norm(50,9))},
+      stats:{health:clamp(r.norm(85,6)),happy:clamp(r.norm(74,8)),know:1,social:clamp(r.norm(50,9))},
       fam:{father:{name:r.pick(D.parentNames.M),age0:r.int(26,36),alive:true,job:{title:r.pick(['技术工人','企业职员','个体经营者','物流从业者'])}},mother:{name:r.pick(D.parentNames.F),age0:r.int(24,34),alive:true,job:{title:r.pick(['企业职员','社区工作人员','商店经营者','医护人员'])}},parentHH:parentIncome,home:rural?'乡镇自建房':r.pick(['城市租住房','普通商品房','老小区住房']),siblings:[]},
       edu:{stage:'baby',school:'',label:'婴儿',level:''},eduDone:'',job:null,jobHist:[],income:0,savings:0,debt:0,
       focus:'平衡',flags:{},done:{},log:[],snaps:[],notes:[],kids:[],spouse:null,partner:null,retired:false,
@@ -38,13 +38,13 @@
     snapshot(l);return l;
   }
   const money=n=>Math.abs(n)>=10000?(n/10000).toLocaleString('zh-CN',{maximumFractionDigits:1})+'万元':Math.round(n).toLocaleString('zh-CN')+'元';
-  const opt=(label,hint,apply,w=1)=>({label,hint:hint.replace(/知识 \+(\d+)/g,(_,n)=>'知识 +'+Math.max(1,Math.round(Number(n)*.4))),apply,w});
+  const opt=(label,hint,apply,w=1)=>({label,hint:hint.replace(/知识 \+(\d+)/g,(_,n)=>'知识 +'+(Math.round(Number(n)*.12*10)/10)),apply,w});
   function getJob(l,type,preferred) {
     const major=D.majors.find(m=>m.id===l.flags.major);
-    const [title,k]=preferred||(type==='college'&&major?major.job:l.r.pick(D.jobs[type]));
+    const [title,k]=preferred||(type==='college'&&major&&l.r.chance(.4)?major.job:l.r.pick(D.jobs[type]));
     l.flags.livesWithParents=false;l.flags.flexible=false;
     l.job={title,kind:type,sector:'private',sinceAge:l.age,salaryHistory:[]};l.edu.stage='work';
-    l.income=Math.round(D.national.disposableIncome*k*province(l.pref).incomeFactor*Math.exp(l.r.norm(0,.18)));
+    l.income=G.CNEconomy.startingPay(l,type,k);
     l.job.salaryHistory=[l.income];
     l.jobHist.push({age:l.age,title,income:l.income});
     log(l,'work',`你成为一名${title}，第一年的收入约为${money(l.income)}。`,'good');
@@ -55,6 +55,8 @@
   function pendingDecisions(l) {
     if(!l.alive)return [];
     const a=l.age,s=l.stats;
+    const people=G.CNSociety?.decisions(l,{dec,opt,log});if(people)return people;
+    const education=G.CNEducation?.decisions(l,{dec,opt,log});if(education)return education;
     const career=G.CNCareer?.decisions(l,{dec,opt,log,getJob});if(career)return career;
     const queer=G.CNQueer.decisions(l,{dec,opt,log,getJob});if(queer)return queer;
     const extra=G.CNLocal.addDecisions(l,{dec,opt,log,getJob});if(extra)return extra;
@@ -62,22 +64,14 @@
       opt('参加运动社团','健康 +6，认识新朋友',l=>{l.hobbies.push('运动');s.health+=6;s.social+=4;return '你加入了学校的运动社团。操场上多了几位会叫你名字的朋友。';}),
       opt('去图书馆','知识 +8',l=>{l.hobbies.push('阅读');s.know+=8;return '你办了一张借书证。那个暑假，你读了很多课本以外的书。';}),
       opt('学画画或音乐','心情 +7，知识 +3',l=>{l.hobbies.push('艺术');s.happy+=7;s.know+=3;return '你开始学一门艺术。第一次完成作品时，家人认真地看了很久。';})])];
-    if(a===15&&!l.done.zhongkao)return [dec(l,'zhongkao','中考后，去哪里？','九年义务教育结束。你的兴趣、成绩和家庭条件，都会影响接下来的路。这里的录取结果由游戏模型生成。',[
-      opt('争取普通高中','继续准备高考；结果受知识与随机因素影响',l=>{const pass=l.r.chance(clamp(.46+s.know/180,.25,.95));l.edu.stage=pass?'hs':'voc';l.edu.label=pass?'普通高中':'中等职业学校';l.edu.school=l.city+(pass?'某高中':'某职业学校');s.know+=3;return pass?'你收到了高中录取通知书。新课本比初中的厚了许多。':'没有被理想的高中录取。你进入了一所职业学校，决定先学好一门技术。';},2),
+    if(a===15&&!l.done.zhongkao)return [dec(l,'zhongkao','中考后，去哪里？','九年义务教育结束。你的兴趣、成绩和家庭条件，都会影响接下来的路。',[
+      opt('争取普通高中','继续高中课程，准备高考',l=>{const pass=l.r.chance(clamp(.46+s.know/180,.25,.95));l.edu.stage=pass?'hs':'voc';l.edu.label=pass?'普通高中':'中等职业学校';l.edu.school=l.city+(pass?'某高中':'某职业学校');s.know+=3;return pass?'你收到了高中录取通知书。新课本比初中的厚了许多。':'没有被理想的高中录取。你进入了一所职业学校，决定先学好一门技术。';},2),
       opt('选择职业学校','学习技能，毕业后可就业或继续升学',l=>{l.edu.stage='voc';l.edu.label='中等职业学校';l.edu.school=l.city+'某职业学校';s.know+=5;return '你进入职业学校，第一次在实训课上亲手操作设备。';}),
       opt('暂缓升学，先学技能','在家庭支持下学习；成年后再正式就业',l=>{l.edu.stage='training';l.edu.label='技能学习';l.edu.school='技能培训';l.flags.earlySkill=true;s.happy+=3;return '你开始学习一门手艺。未来还很长，你准备先找到自己的立足点。';})])];
-    if(a===18&&!l.done.further)return [dec(l,'further',l.edu.stage==='hs'?'高考后的选择':'下一步的选择','成年以后，人生里可以自己决定的事情，似乎一下子多了起来。',[
-      opt('争取读大学','模拟录取；可能进入本科或高职',l=>{let uni=l.r.chance(clamp(.38+s.know/160,.25,.92));l.edu.stage=uni?'univ':'college';l.edu.label=uni?'本科在读':'高职在读';l.edu.school='某'+(uni?'大学':'职业技术学院');l.flags.gradAge=uni?22:21;l.flags.degree=uni?'本科':'大专';l.income=0;s.know+=8;return uni?'你拿到了一封大学录取通知书。整理行李时，家人往箱子里塞了很多吃的。':'你被一所高职院校录取。你选了一个有实训课程的专业，准备从技能开始。';},l.edu.stage==='hs'?3:1),
-      opt('把技能学扎实，准备就业','成年后进入技能岗位',l=>{l.eduDone='中职';l.flags.gradAge=18;l.flags.jobType='skilled';s.know+=3;return '你完成了技能学习，开始投简历、参加面试。';}),
-      opt('直接找一份工作','更早积累收入和社会经验',l=>{l.eduDone='高中及以下';l.flags.gradAge=18;l.flags.jobType='basic';s.social+=4;return '你决定先就业。第一次自己写简历时，你在“工作经验”那一栏停了很久。';})])];
-    if(a>=18&&a>=(l.flags.gradAge||99)&&!l.job&&!l.done.jobEntry)return [dec(l,'jobEntry','第一份正式工作','学习生活告一段落，你开始认真选择自己的第一份工作。薪资是游戏估算。',[
-      opt('找一份专业相关的工作','收入与学历、地区和岗位有关',l=>{l.eduDone=l.flags.degree||l.eduDone||'中职';getJob(l,l.flags.jobType||(/本科|硕士/.test(l.eduDone)?'college':'skilled'));return '第一次上班，你比约定时间早到了半小时。';},3),
-      opt('找一份离家近的工作','收入略低，家人关系 +8',l=>{l.eduDone=l.flags.degree||l.eduDone||'中职';getJob(l,'skilled');l.flags.livesWithParents=true;l.income*=.88;s.social+=8;return '你留在了熟悉的城市。晚饭时，家里又多了一双筷子。';}),
-      opt('去大城市闯一闯','迁居，收入机会和生活成本一起增加',l=>{l.eduDone=l.flags.degree||l.eduDone||'中职';const p=l.r.pick(D.provinces.filter(p=>p.incomeFactor>1.2));l.pref=p.name;l.city=p.cities[0];l.trail.push({age:a,pref:l.pref,city:l.city});l.migrated=true;getJob(l,l.flags.jobType||(/本科|硕士/.test(l.eduDone)?'college':'skilled'));s.happy-=3;return `你拖着行李来到${l.city}。第一晚的出租屋有点小，但窗外很亮。`;})])];
     if(a>=25&&a<=29&&!l.done.social)return [dec(l,'social','工作之外，也留一点时间','你在周末收到朋友的邀约。生活似乎不应该只有上班和下班。',[
-      opt('多认识一些朋友','关系 +8，有机会遇见伴侣',l=>{s.social+=8;if(l.r.chance(.8)){l.partner={name:l.r.pick(D.surnames)+l.r.pick(D.given[G.CNQueer.partnerSex(l)]),sex:G.CNQueer.partnerSex(l),ageDiff:0};return `你认识了${l.partner.name}。从一起吃饭，到互相分享平凡的一天，你们慢慢熟悉起来。`;}return '你认识了几位新朋友。暂时没有爱情，但周末不再总是一个人。';},2),
+      opt('多认识一些朋友','关系 +8，有机会遇见伴侣',l=>{s.social+=8;if(l.r.chance(.8)&&G.CNSociety.meet(l)){return `你认识了${l.romance.candidate.name}，对方想找时间和你单独聊聊。`;}return '你认识了几位新朋友。暂时没有爱情，但周末不再总是一个人。';},2),
       opt('把时间留给自己','心情 +7，发展兴趣',l=>{s.happy+=7;l.hobbies.push('旅行');return '你开始安排自己的周末，去徒步、看展，也学着好好做一顿饭。';}),
-      opt('专注事业一阵子','知识 +5，收入 +8%',l=>{s.know+=5;l.income*=1.08;return '你把精力放在了工作上，也学会提醒自己按时吃饭。';})])];
+      opt('把精力留给工作','保持目前的工作节奏',l=>{return '你把精力放在了工作上，也学会提醒自己按时吃饭。';})])];
     if(a>=28&&l.partner&&l.partner.sex!==l.sex&&!l.done.marriage)return [dec(l,'marriage','要一起走下去吗？',`你和${l.partner.name}开始谈论共同的未来。`,[
       opt('决定结婚','建立家庭，积蓄用于共同生活',l=>{l.spouse={...l.partner};l.partner=null;l.savings-=Math.min(Math.max(0,l.savings),20000);s.happy+=10;s.social+=6;return `你和${l.spouse.name}领了结婚证。你们商量，先把自己的小日子过好。`;},2),
       opt('先保持现在的关系','继续相处，尊重彼此节奏',l=>{s.happy+=3;return '你们决定暂时不结婚。彼此都觉得，认真相处比赶时间更重要。';}),
@@ -90,12 +84,12 @@
       opt('尝试迎接一个孩子','增加家庭开支，建立新的关系',l=>{if(l.r.chance(.85)){const sex=l.r.chance(.5)?'M':'F';const child={name:l.name.sei+l.r.pick(D.given[sex]),sex,birthAge:l.age};l.kids.push(child);s.happy+=9;return `孩子${child.name}来到你们身边。家里多了奶瓶、玩具，也多了一种牵挂。`;}return '你们暂时没有迎来孩子，决定先照顾好彼此，按照自己的节奏生活。';},2),
       opt('暂时不要孩子','更多时间与财务空间',l=>{s.happy+=4;return '你们决定先过好两个人的生活，把时间留给工作、旅行和彼此。';})])];
     if(a>=38&&l.job&&!l.done.career)return [dec(l,'career','到了职业的岔路口','几年工作之后，你更了解自己的能力，也开始重新衡量想过的生活。',[
-      opt('争取晋升','有机会涨薪，也增加工作压力',l=>{if(G.CNQueer.blocked(l))return '在本局的这个单位里，公开身份后的歧视让这次晋升没有进入评审。你开始考虑争取支持或更换工作环境。';if(l.r.chance(.62)){l.income*=1.32;s.happy+=4;return '你争取到了一个更有责任的岗位。收入涨了，需要处理的事情也更多了。';}s.health-=3;return '这次没有成功晋升。你给自己放了几天假，重新整理下一步的打算。';}),
-      opt('学习一项新技能','积蓄 -8,000 元，知识 +12',l=>{l.savings-=8000;s.know+=12;l.income*=1.12;return '你下班后去上课。重新做学生很累，但你找回了一点久违的好奇心。';},2),
+      opt('争取晋升','有机会涨薪，也增加工作压力',l=>{if(G.CNQueer.blocked(l))return '在这个单位里，公开身份后的歧视让这次晋升没有进入评审。你开始考虑争取支持或更换工作环境。';if(l.r.chance(.62)){l.income=Math.round(Math.max(G.CNCareer.floor(l),l.income*1.12));s.happy+=4;return '你争取到了一个更有责任的岗位。收入涨了，需要处理的事情也更多了。';}s.health-=3;return '这次没有成功晋升。你给自己放了几天假，重新整理下一步的打算。';}),
+      opt('学习一项新技能','积蓄 -8,000 元，知识 +4',l=>{l.savings-=8000;s.know+=4;return '你下班后去上课。重新做学生很累，但你找回了一点久违的好奇心。';},2),
       opt('保持现在的节奏','健康 +5，关系 +5',l=>{s.health+=5;s.social+=5;return '你没有换工作，而是开始认真保护下班后的时间。';})])];
     if(a>=42&&!l.done.housing)return [G.CNLocal.housing(l,{dec,opt})];
-    if(a>=60&&!l.done.retirement)return [dec(l,'retirement','慢一点，也可以','你开始考虑未来几年的工作安排。这里是游戏中的个人选择，不代表法定退休规则。',[
-      opt('逐步退休，留出生活','收入改为简化养老收入，健康 +7',l=>{l.retired=true;l.job=null;l.income=Math.round(22000*province(l.pref).incomeFactor);s.health+=7;s.happy+=6;return '你慢慢放下了工作，把早晨留给散步，把下午留给喜欢的事。';},2),
+    if(a>=60&&!l.done.retirement)return [dec(l,'retirement','慢一点，也可以','你开始考虑未来几年的工作安排。',[
+      opt('逐步退休，留出生活','开始领取养老金，健康 +7',l=>{l.retired=true;l.job=null;l.income=Math.round(22000*province(l.pref).incomeFactor);s.health+=7;s.happy+=6;return '你慢慢放下了工作，把早晨留给散步，把下午留给喜欢的事。';},2),
       opt('再工作几年','65 岁结束全职工作',l=>{l.flags.retireAt=65;s.know+=3;return '你决定再工作几年，也开始培养能够接手的年轻同事。';})])];
     if(a>=72&&!l.done.later)return [dec(l,'later','晚年的日常，想怎样安排？','比起“还有多少时间”，你现在更在意“想和谁一起、怎样度过”。',[
       opt('和家人多相处','关系 +10，心情 +6',l=>{s.social+=10;s.happy+=6;return '你和家人约好，每隔一阵就坐下来吃一顿饭。饭菜不复杂，话却总是说不完。';},2),
@@ -106,7 +100,7 @@
   function resolve(l,d,i) {
     if(l.done[d.id])return;const o=d.options.find(o=>o.i===i);if(!o)throw new Error('无效选择');
     l.done[d.id]=true;l.choices.push({age:l.age,id:d.id,option:i,label:o.label});
-    const before=l.savings,booked=l.finances?.balance||0,oldKnow=l.stats.know;const t=o.apply(l);if(l.stats.know>oldKnow)l.stats.know=oldKnow+Math.max(1,Math.round((l.stats.know-oldKnow)*.4));G.CNLocal.normalize(l);
+    const before=l.savings,booked=l.finances?.balance||0,oldKnow=l.stats.know;const t=o.apply(l);if(l.stats.know>oldKnow)l.stats.know=oldKnow+Math.round((l.stats.know-oldKnow)*.12*10)/10;G.CNLocal.normalize(l);
     if(l.finances&&l.finances.year===l.year){const extra=before-l.savings+(l.finances.balance-booked);l.finances.other=(l.finances.other||0)+extra;l.finances.expense+=extra;l.finances.balance-=extra;}
     if(t)log(l,'choice',t,'choice');clampStats(l);snapshot(l);
   }
@@ -127,21 +121,23 @@
     if(a===3){l.edu.label='幼儿园';log(l,'school','你进入幼儿园。第一次和家人分别时有点不舍，后来慢慢交到了朋友。','good');}
     if(a===6){l.edu={stage:'elem',label:'小学',school:l.city+'某小学'};log(l,'school','你背着新书包走进小学，开始了自己的学生时代。','good');}
     if(a===12){l.edu={stage:'jhs',label:'初中',school:l.city+'某中学'};log(l,'school','你进入初中，科目变多了，也开始有自己的小秘密。','good');}
-    if(a>=6&&a<18)s.know+=Math.max(0,r.norm(l.focus==='学习'?1.15:.75,.5))*clamp(1-s.know/130,.25,1);
-    if(['univ','college','grad'].includes(l.edu.stage)&&a<=(l.flags.gradAge||22))s.know+=Math.max(0,r.norm(.9,.35));
-    if(a>=25&&l.focus!=='学习'&&!l.flags.furtherStudy)s.know-=.2+(s.know>60?.15:0);
+    if(a>=6&&a<18)s.know+=Math.max(0,r.norm(l.focus==='学习'?.28:.14,.12))*clamp(1-s.know/130,.25,1);
+    if(['univ','college','grad'].includes(l.edu.stage)&&a<=(l.flags.gradAge||22))s.know+=Math.max(0,r.norm(.26,.12));
+    if(a>=25&&l.focus!=='学习'&&!l.flags.furtherStudy)s.know-=.04+(s.know>60?.04:0);
     if(a===(l.flags.gradAge||-1))log(l,'school',`你完成了${l.flags.degree||'技能'}学习，站在新的起点。`,'good');
     if(l.job&&!l.retired){G.CNCareer?.year(l,log);if(r.chance(.045)){const cost=r.int(1000,7000);l.savings-=cost;log(l,'money',`计划外的支出让你花了${money(cost)}，你重新调整了这一年的预算。`,'neutral');}}
     if(l.flags.retireAt&&a>=l.flags.retireAt&&!l.retired){l.retired=true;l.job=null;l.income=Math.round(24000*province(l.pref).incomeFactor);log(l,'work','你结束了全职工作。第一次不用定闹钟的周一，还是醒得很早。','good');}
     G.CNLocal.year(l,{log});
-    for(const p of [l.fam.father,l.fam.mother])if(p.alive&&r.chance(qx(p===l.fam.father?'M':'F',p.age0+a))){p.alive=false;p.deathAge=p.age0+a;s.happy-=12;log(l,'family',`${p===l.fam.father?'父亲':'母亲'}${p.name}去世了。你慢慢理解，有些陪伴会用另一种方式留在生活里。`,'bad');}
-    for(const child of l.kids){const ca=a-child.birthAge;if([3,6,12,18,22].includes(ca))log(l,'family',`${child.name}${ca===3?'上幼儿园':ca===6?'上小学':ca===12?'上初中':ca===18?'成年':'开始自己的工作和生活'}了。你发现，时间真的过得很快。`,'good');}
+    for(const p of [l.fam.father,l.fam.mother])if(p.alive&&r.chance(qx(p===l.fam.father?'M':'F',p.age0+a)*(p.health>=80?.7:1))){p.alive=false;p.deathAge=p.age0+a;s.happy-=12;G.CNSociety.onParentDeath(l,p===l.fam.father?'father':'mother',log);}
+    G.CNSociety.year(l,log);G.CNCityStories.year(l,log);
+    if(l.retired&&l.focus==='事业')l.focus='平衡';
+    for(const child of l.kids.filter(k=>k.alive!==false)){const ca=a-child.birthAge;if([3,6,12,18,22].includes(ca))log(l,'family',`${child.name}${ca===3?'上幼儿园':ca===6?'上小学':ca===12?'上初中':ca===18?'成年':'开始自己的工作和生活'}了。你发现，时间真的过得很快。`,'good');}
     const group=a<6?'baby':a<13?'child':a<19?'teen':a<35?'young':a<62?'adult':'old';
     const pool=stories[group].filter(t=>!l.log.some(e=>e.t===t&&a-e.age<7));
     if(pool.length&&r.chance(.84)){log(l,group==='baby'?'family':'story',G.CNLocal.contextualStory(l,group,pool));s.happy+=r.norm(.8,1.2);}
     if(a>=30&&r.chance(.035)){s.health-=r.int(3,10);l.savings-=r.int(500,5000);log(l,'health','身体发出了一点提醒。你去医院做了检查，接下来准备认真休息、调整作息。','bad');}
     if(a>=45)s.health-=.65+(a-45)*.012;
-    for(const [k,v] of Object.entries(l.age>=6?D.focus[l.focus]||{}:{}))s[k]+=v;
+    for(const [k,v] of Object.entries(l.age>=6?D.focus[l.retired&&l.focus==='事业'?'平衡':l.focus]||{}:{}))s[k]+=v;
     s.happy+=(65-s.happy)*.075+r.norm(0,1);s.social+=(55-s.social)*.04;
     if(l.finances){const other=Math.round(openingSavings+l.finances.balance-l.savings);l.finances.other=(l.finances.other||0)+other;l.finances.expense+=other;l.finances.balance-=other;}
     clampStats(l);l.peak.income=Math.max(l.peak.income,l.income);l.peak.savings=Math.max(l.peak.savings,l.savings);
@@ -158,7 +154,7 @@
     if(!x.name||typeof x.name.sei!=='string'||typeof x.name.mei!=='string'||!x.name.sei.trim()||!x.name.mei.trim()||x.name.sei.length>4||x.name.mei.length>8||!['M','F'].includes(x.sex))fail();
     if(!Number.isInteger(x.age)||x.age<0||x.age>115||typeof x.alive!=='boolean'||!x.born||!Number.isInteger(x.born.y)||x.born.y<1900||x.born.y>2100||x.year!==x.born.y+x.age||(!x.alive&&x.deathAge!==x.age))fail();
     if(!x.stats||['health','happy','know','social'].some(k=>!Number.isFinite(x.stats[k])||x.stats[k]<0||x.stats[k]>100)||!Number.isFinite(x.savings)||Math.abs(x.savings)>1e12||!Number.isFinite(x.income)||x.income<0||x.income>1e10||!Number.isFinite(x.debt)||x.debt<0||x.debt>1e12)fail();
-    if(!Array.isArray(x.log)||x.log.length>5000||x.log.some(e=>!e||typeof e.t!=='string'||e.t.length>3000||!Number.isInteger(e.age)||e.age<0||e.age>x.age)||!Array.isArray(x.snaps)||!Array.isArray(x.kids)||x.kids.length>20||!Array.isArray(x.notes)||x.notes.length>500||!Array.isArray(x.choices)||x.choices.length>500||!Array.isArray(x.trail)||x.trail.length>200)fail();
+    if(!Array.isArray(x.log)||x.log.length>5000||x.log.some(e=>!e||typeof e.t!=='string'||e.t.length>3000||!Number.isInteger(e.age)||e.age<0||e.age>x.age)||!Array.isArray(x.snaps)||!Array.isArray(x.kids)||x.kids.length>20||!Array.isArray(x.notes)||x.notes.length>500||!Array.isArray(x.choices)||x.choices.length>2000||!Array.isArray(x.trail)||x.trail.length>200)fail();
     const text=v=>typeof v==='string'&&v.length<=3000,list=(v,max,check)=>Array.isArray(v)&&v.length<=max&&v.every(check);
     for(const c of x.choices){
       if(!c||typeof c.id!=='string'||typeof c.label!=='string')fail();
@@ -177,6 +173,15 @@
     if(x.employment){const e=x.employment;if(!Array.isArray(e.history)||e.history.length>500)fail();if(e.search&&(!finite(e.search.since,0,x.age)||!finite(e.search.previousIncome,0,1e10)||typeof e.search.kind!=='string'))fail();if(e.pending&&(!finite(e.pending.age,0,x.age)||!finite(e.pending.monthly,0,1e10)||!finite(e.pending.due,0,1e12)||!finite(e.pending.years,1,115)||typeof e.pending.withheld!=='boolean'))fail();}
     if(x.playback&&(!Number.isInteger(x.playback.start)||!Number.isInteger(x.playback.end)||x.playback.start<0||x.playback.end<x.playback.start||x.playback.end>x.log.length||x.playback.age!==x.age||!finite(x.playback.progress,0,1)))fail();
     if(x.flags.furtherStudy&&(!finite(x.flags.furtherStudy.startAge,18,115)||!finite(x.flags.furtherStudy.finishAge,x.flags.furtherStudy.startAge+1,118)||!['大专','本科','硕士'].includes(x.flags.furtherStudy.target)))fail();
+    const person=p=>p&&text(p.name)&&['M','F'].includes(p.sex)&&typeof p.alive==='boolean';
+    if(x.friends&&(!list(x.friends,30,p=>person(p)&&text(p.id)&&text(p.role)&&finite(p.ageDiff,-10,10)&&finite(p.lastContactAge,-1,x.age))))fail();
+    if([x.fam.father,x.fam.mother].some(p=>p.health!=null&&!finite(p.health,0,100)))fail();
+    if(x.fam.estate&&(!finite(x.fam.estate.cash,0,1e12)||!finite(x.fam.estate.homeValue,0,1e12)||typeof x.fam.estate.cashSettled!=='boolean'||typeof x.fam.estate.homeSettled!=='boolean'))fail();
+    if(x.fam.funeral&&!list(x.fam.funeral,2,f=>f&&['father','mother'].includes(f.key)&&finite(f.age,0,x.age)&&text(f.name)))fail();
+    if(x.romance&&(x.romance.candidate&&!person(x.romance.candidate)||x.romance.count!=null&&!finite(x.romance.count,0,500)))fail();
+    const admission=x.edu.admission;if(admission&&(!['exam','score','repeat','major','result','done'].includes(admission.phase)||admission.score!=null&&!finite(admission.score,0,750)||admission.line!=null&&!finite(admission.line,0,750)||admission.retryAge!=null&&!finite(admission.retryAge,18,116)))fail();
+    const employment=x.employment;if(employment?.gov&&(!finite(employment.gov.startAge,18,x.age)||employment.gov.resultAge!==employment.gov.startAge+1))fail();
+    if(employment?.search){const s=employment.search;if(s.availableAge!=null&&!finite(s.availableAge,0,116)||s.round!=null&&!finite(s.round,0,2)||s.offers&&!list(s.offers,3,o=>o&&text(o.title)&&text(o.company)&&text(o.kind)&&finite(o.income,0,1e10)&&Number.isInteger(o.id))||s.applied&&!list(s.applied,3,n=>Number.isInteger(n)&&n>=0&&n<3))fail();}
     if([x.partner,x.spouse].some(p=>p&&(typeof p.name!=='string'||p.name.length>40)))fail();
     if(x.actions&&(!Array.isArray(x.actions)||x.actions.length>116||x.actions.some(a=>!a||typeof a.id!=='string'||!Number.isInteger(a.age)||a.age<0||a.age>x.age)))fail();
     if(x.origin&&(typeof x.origin.settlement!=='string'||typeof x.origin.family!=='string'))fail();
@@ -189,7 +194,7 @@
     x.version=D.version;G.CNLocal.normalize(x);return attachR(x);
   }
   function act(l,id){const ok=G.CNLocal.act(l,id,log);if(ok){clampStats(l);snapshot(l);}return ok;}
-  function transact(l,action,args){const result=['study','moveCity'].includes(action)?G.CNLocal.spend(l,action,args,log):G.CNAssets.transact(l,action,args,log);if(result.ok){clampStats(l);snapshot(l);}return result;}
+  function transact(l,action,args){const result=action==='jobSearch'?G.CNCareer.requestSearch(l):['study','moveCity','wellbeing'].includes(action)?G.CNLocal.spend(l,action,args,log):G.CNAssets.transact(l,action,args,log);if(result.ok){clampStats(l);snapshot(l);}return result;}
   function peers(l,maxAge=120){return Array.from({length:5},(_,i)=>{const date=`${l.born.y}-${String(l.born.m).padStart(2,'0')}-${String(l.born.d).padStart(2,'0')}T12:00:00+08:00`;return runAuto(createLife({seed:(l.seed+Math.imul(i+1,2654435761))>>>0,date}),maxAge);});}
   G.CNEngine={transact,assetOptions:G.CNAssets.options,assetTotals:G.CNAssets.totals,privateOptions:G.CNQueer.options,requestPrivate:G.CNQueer.request,createLife,step,pendingDecisions,resolve,autoChoice,runAuto,serialize,hydrate,statusLabel,money,nameOf,province,place,qx,act,peers,actionOptions:G.CNLocal.actionOptions,achievements:G.CNLocal.achievements,cityProfile:G.CNLocal.cityProfile,supportedVersions:['cn-0.1.0','cn-0.2.0',D.version],version:D.version};
 })(typeof window !== 'undefined' ? window : globalThis);
