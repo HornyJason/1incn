@@ -2,13 +2,13 @@
 (function(G){
   const draw=(l,salt)=>G.CNQueer.draw(l.seed,salt),full=(l,sex,salt)=>{const D=G.CN_DATA;return D.surnames[Math.floor(draw(l,salt)*D.surnames.length)]+D.given[sex][Math.floor(draw(l,salt+1)*D.given[sex].length)];};
   function normalize(l){
-    if(!l.friends)l.friends=[['desk','小学同桌',0],['school','老同学',1],['friend','朋友',2]].map(([id,role,i])=>{const sex=draw(l,731+i)<.5?'M':'F';return {id,role,sex,name:full(l,sex,741+i*3),ageDiff:i===2?1:0,alive:true,lastContactAge:-1};});
+    if(!l.friends?.length)l.friends=[['desk','小学同桌',0],['school','老同学',1],['friend','朋友',2]].map(([id,role,i])=>{const sex=draw(l,731+i)<.5?'M':'F';return {id,role,sex,name:full(l,sex,741+i*3),ageDiff:i===2?1:0,alive:true,lastContactAge:-1};});
     for(const p of [l.fam.father,l.fam.mother])if(p.health==null)p.health=75;
     for(const p of l.fam.siblings){if(p.alive==null)p.alive=true;if(p.atHome==null)p.atHome=l.age+p.age<30;}
     if(!l.fam.estate)l.fam.estate={cash:Math.round(l.fam.parentHH*(.6+draw(l,821))),homeValue:l.fam.home.includes('租')?0:Math.round(G.CNEconomy.profile({...l,pref:l.birthPref,city:l.birthCity,rural:l.origin.settlement!=='城区'}).homePrice*.8),cashSettled:false,homeSettled:false};
     l.fam.funeral=l.fam.funeral||[];return l;
   }
-  function friend(l,id='desk'){normalize(l);return l.friends.find(p=>p.id===id);}
+  function friend(l,id='desk'){normalize(l);return l.friends.find(p=>p.id===id)||l.friends[0];}
   const parentsAlive=l=>l.fam.father.alive||l.fam.mother.alive;
   const hasFamily=l=>parentsAlive(l)||l.spouse&&l.spouse.alive!==false||l.partner&&l.partner.alive!==false||l.kids.some(k=>k.alive!==false)||l.fam.siblings.some(k=>k.alive!==false);
   function companion(l){if(hasFamily(l))return '家人';return l.friends.some(p=>p.alive)?'朋友':'邻居';}

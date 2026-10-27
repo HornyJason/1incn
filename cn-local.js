@@ -56,7 +56,7 @@
     if(a===8&&!done.schoolLife)return [dec(l,'schoolLife','红领巾、课间操和放学路','班里开始安排新的活动。你想把课余时间分给什么？',[
       opt('和同学一起参加集体活动','关系 +5，留下一段校园记忆',l=>{s.social+=5;return '你第一次和同学一起完成了班级活动。回家时，你把红领巾叠好放进书包。';},2),
       opt('认真完成自己的小作品','知识 +4，心情 +3',l=>{s.know+=4;s.happy+=3;return '你交出了一份有点笨拙、却完全属于自己的小作品。老师把它贴在了教室后墙。';})])];
-    if(a===12&&!done.schoolLetter){const album=l.seed%2===0;return [dec(l,'schoolLetter',album?'毕业同学录，轮到你写了':'毕业纪念册里的一封信',album?'小学毕业前，同桌把一本同学录递到你手上，给你留了一页。':'小学毕业前，同桌把一封信夹进了你的纪念册。',[
+    if(a===12&&!done.schoolLetter&&G.CNSociety.friend(l).alive){const album=l.seed%2===0;return [dec(l,'schoolLetter',album?'毕业同学录，轮到你写了':'毕业纪念册里的一封信',album?'小学毕业前，同桌把一本同学录递到你手上，给你留了一页。':'小学毕业前，同桌把一封信夹进了你的纪念册。',[
       opt(album?'认真写下毕业留言':'认真回一封信，约好以后联系','关系 +4，心情 +3',l=>{s.social+=4;s.happy+=3;return album?'你在同学录上写下最难忘的一件事，又画了一幅小小的画。许多年后，那一页仍让人想起当年的教室。':'你写满了两页信纸，把地址也工工整整地写在最后。那封回信，和毕业照一起留在了对方的抽屉里。';},2),
       opt(album?'留下联系方式，约好以后再见':'把信收好，当面说一声谢谢','心情 +4',l=>{s.happy+=4;return album?'你工整地填好同学录，认真写下“以后常联系”。合影时，你们又往彼此身边挤了一点。':'放学时，你追上同桌说了一声谢谢。回家以后，把那封信放进了最喜欢的一本书。';})])];}
     if(a===19&&!done.homeLetter&&(l.fam.father.alive||l.fam.mother.alive))return [dec(l,'homeLetter','行李里藏着家里的一封信','整理抽屉时，你发现了家人放在行李夹层里的信。',[
