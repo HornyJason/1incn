@@ -10,7 +10,7 @@
     const parent = l.fam.mother.alive ? '妈妈' : l.fam.father.alive ? '爸爸' : '家人';
     const common = {id:d.id,title:d.title,text:d.text,age:l.age,year:l.year,name:name(l),surname:l.name.sei,options:opts(d)};
     const kinds = {
-      schoolLetter:{kind:'letter',from:'小学同桌',msgs:[`${name(l)}：`,`毕业纪念册传到我这里的时候，我想了半天，不知道写什么。`,`还记得我们趁课间跑去操场吗？你说以后要去看看很远的地方。`,`上了初中，也别忘了给我写信。祝你暑假快乐！`]},
+      schoolLetter:l.seed%2===0?{kind:'notice',doc:'毕业同学录',from:'小学同桌',msgs:[`${name(l)}同学：`,'最难忘的事：课间一起跑去操场，回教室时总是踩着铃声。','想对你说：希望你去新的学校，也能遇到聊得来的朋友。','我们的约定：以后见面，讲讲各自去过的地方。','这一页，留给你写下我们的故事。']}:{kind:'letter',from:'小学同桌',msgs:[`${name(l)}：`,`毕业纪念册传到我这里的时候，我想了半天，不知道写什么。`,`还记得我们趁课间跑去操场吗？你说以后要去看看很远的地方。`,`上了初中，也别忘了给我写信。祝你暑假快乐！`]},
       homeLetter:{kind:'letter',from:parent,msgs:[`${l.name.mei}：`,`放进行李的那封信，你应该看到了吧。到了新的地方，要记得按时吃饭，不要总舍不得花钱。`,`家里一切都好，窗台上的那盆花又开了。遇到不开心的事，也可以和我们说。`,`不必每次都报喜。照顾好自己，空了就回来坐坐。`]},
       interest:{kind:'line',from:'班级活动群',msgs:['这学期的课外活动开始报名啦。','运动、阅读、音乐都可以试试。你想参加哪一项？']},
       schoolLife:{kind:'notice',doc:'班级活动通知',from:'班主任',msgs:['亲爱的同学：','新学期的班级活动开始了。你可以和同学一起参与，也可以认真完成一份自己的作品。','不用做得完美，试一试就很好。']},
@@ -33,7 +33,7 @@
       queerCrush:{kind:'letter',from:'写给自己的信',msgs:['有些心事，先写下来也好。',`我发现，自己会留意那个${l.sex==='M'?'男生':'女生'}的消息。想和对方多说两句话，见到时又会有点紧张。`,'这些感觉并不需要立刻向谁解释。什么时候说、向谁说，都可以慢慢决定。']},
       sameConfession:{kind:'line',from:'一位信任你的朋友',msgs:['有件事想认真和你说。','我对你的喜欢，好像已经超出了朋友的感情。','你不用勉强自己，也不用急着回答。我会尊重你的感受。']}
     };
-    const special = d.id.startsWith('out_') ? {kind:'line',from:d.id==='out_family'?parent:d.id==='out_friends'?'信任的朋友':'信任的同事',msgs:['你说有件重要的事想聊，我在听。','如果现在还没准备好，也可以以后再说。']} : null;
+    const special = d.id.startsWith('severance_')?{kind:'notice',doc:'离职结算单',from:'原单位 · 本局结算',msgs:[`${name(l)}：`,d.text,'请确认接下来的结算安排。']}:d.id.startsWith('jobSearch_')?{kind:'mail',from:'招聘与就业服务',msgs:[d.text,'你可以继续投递，也可以先调整一阵子。新的工作和薪酬仍有不确定性。']}:d.id.startsWith('out_') ? {kind:'line',from:d.id==='out_family'?parent:d.id==='out_friends'?'信任的朋友':'信任的同事',msgs:['你说有件重要的事想聊，我在听。','如果现在还没准备好，也可以以后再说。']} : null;
     const replies={
       schoolLetter:[{say:'信收到啦！等我到了新学校，就给你写信。',reply:'那就说好了。下次见面，要告诉我新学校是什么样的。'},{say:'谢谢你的信。我会好好收着的！',reply:'暑假快乐，我们开学再见。'}],
       homeLetter:[{say:'最近有好事，也有一点烦恼。写下来给你们看看，别担心我。',reply:'我们都看到了。慢慢来，累了就歇一歇。'},{say:'信我看到了。今天有空，想听听你们的声音。',reply:'在呢，想聊多久都行。'},{say:'这封信我收好了。下次回家，带点这里的特产给你们。',reply:'人回来就好，路上注意安全。'}],

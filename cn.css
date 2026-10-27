@@ -238,3 +238,52 @@ dialog.modal::backdrop { background:transparent; }
 #correspondenceDialog button:not(:disabled):active { background:var(--accent-soft); }
 .feed .star { min-width:30px; min-height:30px; }
 .feed .star:not(:disabled):active { color:var(--accent); background:var(--accent-soft); }
+
+/* 0.5：沿用原作的顶部、ghost / mopts 与属性条，收起辅助功能。 */
+header.top { gap:8px; }
+.cn-home-button { text-decoration:none; white-space:nowrap; }
+.cn-top-playback { display:flex; align-items:center; gap:7px; margin-left:auto; }
+.cn-top-playback .speed button { min-height:34px; border:1px solid var(--line); background:transparent; border-radius:6px; cursor:pointer; }
+.cn-top-playback .speed .on { background:var(--ink); color:var(--bg); }
+.cn-more { position:relative; }
+.cn-more>summary { list-style:none; cursor:pointer; white-space:nowrap; }
+.cn-more>summary::-webkit-details-marker { display:none; }
+#globalMenu { margin-left:auto; }
+.cn-more-panel { position:absolute; z-index:35; right:0; top:calc(100% + 8px); width:230px; padding:14px; background:var(--paper); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); max-height:70dvh; overflow-y:auto; }
+.cn-more-panel>a { display:block; padding:7px; text-decoration:none; }
+.cn-more-panel { display:flex; flex-direction:column; align-items:stretch; gap:8px; }
+.cn-more-panel label { display:flex; align-items:center; gap:6px; font-size:13px; }
+.cn-more-panel .theme { width:100%; text-align:left; border-radius:8px; }
+#lifeMenu .cn-more-panel { left:0; right:auto; width:270px; }
+#lifeMenu .cn-select-menu { position:static; margin-top:6px; box-shadow:none; }
+.lifebar { display:grid; grid-template-columns:32px 82px minmax(0,1fr); gap:2px 10px; padding-top:10px; padding-bottom:16px; }
+.lifebar .sbchar { grid-row:1/3; }
+.lifebar .sbage { grid-column:2; grid-row:1; }
+.lifebar .sbage small { display:block; margin-left:0; font-size:10px; line-height:1.4; }
+#yearMonth { grid-column:2; grid-row:2; font-size:11px; }
+.cn-metrics { grid-column:3; grid-row:1/3; min-width:0; }
+.cn-metrics .stats { margin:0; padding:0; }
+.cn-metrics .money { margin:7px 0 0; gap:3px 14px; font-size:11px; line-height:1.5; }
+.cn-metrics .money b { margin-left:4px; }
+.lifehead .cn-inline-status { display:inline; margin-left:8px; font:12px var(--sans); color:var(--muted); }
+.controls.cn-controls { border-top:0; border-bottom:0; margin:10px 0; padding:5px 0; gap:8px; }
+.cn-move { margin:20px 0; }
+.cn-move summary { cursor:pointer; font-family:var(--serif); }
+.cn-more>summary:active,.cn-more-panel>a:active { background:var(--accent-soft); }
+.cn-more>summary:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+#life { margin-top:0; padding-top:0; }
+#life .lifebar-wrap { margin-top:0; padding-top:0; top:var(--hdr-h,57px); }
+.letterwrap .ltpaper { border-bottom-left-radius:0; border-bottom-right-radius:0; position:relative; z-index:0; }
+.letterwrap .phopts { margin-top:0; border-top-left-radius:0; border-top-right-radius:0; position:relative; z-index:1; }
+@media(max-width:600px){
+  header.top { padding:9px 10px; gap:5px; }
+  .brand-num { font-size:17px; }.brand-sub { font-size:11px; }
+  .cn-top-playback { gap:4px; }.cn-top-playback .ghost { padding:5px 8px; }
+  .cn-top-playback .speed { gap:3px; }.cn-top-playback .speed button { padding:4px 5px; font-size:11px; }
+  .cn-home-button { padding:5px 7px!important; font-size:11px!important; }
+  .cn-more>summary { padding:6px 10px; }
+  .lifebar { grid-template-columns:26px 55px minmax(0,1fr); gap:2px 7px; padding:8px 12px 15px; }
+  .lifebar .sbchar { width:26px; }.lifebar .sbage b { font-size:22px; }
+  .cn-metrics .stats { gap:3px 7px; }.cn-metrics .stat { font-size:10px; }.cn-metrics .stat b { font-size:11px; }
+  .cn-metrics .money { font-size:10px; gap:2px 8px; }
+}

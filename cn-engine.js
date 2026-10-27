@@ -12,7 +12,7 @@
     r.wpick=(a,fn)=>{let x=r()*a.reduce((s,v)=>s+fn(v),0);return a.find(v=>(x-=fn(v))<=0)||a[a.length-1];};
     l.r=r; return l;
   }
-  function log(l,c,t,tone='neutral',note='游戏情节；事件概率为当前版本的模型参数。') {
+  function log(l,c,t,tone='neutral',note='') {
     l.log.push({age:l.age,year:l.year,c,t,tone,note});
   }
   const province=n=>D.provinces.find(p=>p.name===n);
@@ -38,13 +38,14 @@
     snapshot(l);return l;
   }
   const money=n=>Math.abs(n)>=10000?(n/10000).toLocaleString('zh-CN',{maximumFractionDigits:1})+'万元':Math.round(n).toLocaleString('zh-CN')+'元';
-  const opt=(label,hint,apply,w=1)=>({label,hint,apply,w});
+  const opt=(label,hint,apply,w=1)=>({label,hint:hint.replace(/知识 \+(\d+)/g,(_,n)=>'知识 +'+Math.max(1,Math.round(Number(n)*.4))),apply,w});
   function getJob(l,type,preferred) {
     const major=D.majors.find(m=>m.id===l.flags.major);
     const [title,k]=preferred||(type==='college'&&major?major.job:l.r.pick(D.jobs[type]));
     l.flags.livesWithParents=false;l.flags.flexible=false;
-    l.job={title,kind:type,sector:'private'};l.edu.stage='work';
+    l.job={title,kind:type,sector:'private',sinceAge:l.age,salaryHistory:[]};l.edu.stage='work';
     l.income=Math.round(D.national.disposableIncome*k*province(l.pref).incomeFactor*Math.exp(l.r.norm(0,.18)));
+    l.job.salaryHistory=[l.income];
     l.jobHist.push({age:l.age,title,income:l.income});
     log(l,'work',`你成为一名${title}，第一年的收入约为${money(l.income)}。`,'good');
   }
@@ -54,6 +55,7 @@
   function pendingDecisions(l) {
     if(!l.alive)return [];
     const a=l.age,s=l.stats;
+    const career=G.CNCareer?.decisions(l,{dec,opt,log,getJob});if(career)return career;
     const queer=G.CNQueer.decisions(l,{dec,opt,log,getJob});if(queer)return queer;
     const extra=G.CNLocal.addDecisions(l,{dec,opt,log,getJob});if(extra)return extra;
     if(a===10&&!l.done.interest)return [dec(l,'interest','课本之外，你想试试什么？','放学后的时间很有限。你开始发现，自己也可以拥有一种喜欢的生活。',[
@@ -104,7 +106,7 @@
   function resolve(l,d,i) {
     if(l.done[d.id])return;const o=d.options.find(o=>o.i===i);if(!o)throw new Error('无效选择');
     l.done[d.id]=true;l.choices.push({age:l.age,id:d.id,option:i,label:o.label});
-    const before=l.savings,booked=l.finances?.balance||0;const t=o.apply(l);G.CNLocal.normalize(l);
+    const before=l.savings,booked=l.finances?.balance||0,oldKnow=l.stats.know;const t=o.apply(l);if(l.stats.know>oldKnow)l.stats.know=oldKnow+Math.max(1,Math.round((l.stats.know-oldKnow)*.4));G.CNLocal.normalize(l);
     if(l.finances&&l.finances.year===l.year){const extra=before-l.savings+(l.finances.balance-booked);l.finances.other=(l.finances.other||0)+extra;l.finances.expense+=extra;l.finances.balance-=extra;}
     if(t)log(l,'choice',t,'choice');clampStats(l);snapshot(l);
   }
@@ -125,10 +127,11 @@
     if(a===3){l.edu.label='幼儿园';log(l,'school','你进入幼儿园。第一次和家人分别时有点不舍，后来慢慢交到了朋友。','good');}
     if(a===6){l.edu={stage:'elem',label:'小学',school:l.city+'某小学'};log(l,'school','你背着新书包走进小学，开始了自己的学生时代。','good');}
     if(a===12){l.edu={stage:'jhs',label:'初中',school:l.city+'某中学'};log(l,'school','你进入初中，科目变多了，也开始有自己的小秘密。','good');}
-    if(a>=6&&a<18)s.know+=r.norm(l.focus==='学习'?3.3:2.5,.7);
-    if(['univ','college','grad'].includes(l.edu.stage))s.know+=2;
+    if(a>=6&&a<18)s.know+=Math.max(0,r.norm(l.focus==='学习'?1.15:.75,.5))*clamp(1-s.know/130,.25,1);
+    if(['univ','college','grad'].includes(l.edu.stage)&&a<=(l.flags.gradAge||22))s.know+=Math.max(0,r.norm(.9,.35));
+    if(a>=25&&l.focus!=='学习'&&!l.flags.furtherStudy)s.know-=.2+(s.know>60?.15:0);
     if(a===(l.flags.gradAge||-1))log(l,'school',`你完成了${l.flags.degree||'技能'}学习，站在新的起点。`,'good');
-    if(l.job&&!l.retired){l.income*=clamp(r.norm(1.025,.06),.75,1.3)*(l.focus==='事业'?1.025:1);if(r.chance(.045)){const cost=r.int(1000,7000);l.savings-=cost;log(l,'money',`计划外的支出让你花了${money(cost)}，你重新调整了这一年的预算。`,'neutral');}}
+    if(l.job&&!l.retired){G.CNCareer?.year(l,log);if(r.chance(.045)){const cost=r.int(1000,7000);l.savings-=cost;log(l,'money',`计划外的支出让你花了${money(cost)}，你重新调整了这一年的预算。`,'neutral');}}
     if(l.flags.retireAt&&a>=l.flags.retireAt&&!l.retired){l.retired=true;l.job=null;l.income=Math.round(24000*province(l.pref).incomeFactor);log(l,'work','你结束了全职工作。第一次不用定闹钟的周一，还是醒得很早。','good');}
     G.CNLocal.year(l,{log});
     for(const p of [l.fam.father,l.fam.mother])if(p.alive&&r.chance(qx(p===l.fam.father?'M':'F',p.age0+a))){p.alive=false;p.deathAge=p.age0+a;s.happy-=12;log(l,'family',`${p===l.fam.father?'父亲':'母亲'}${p.name}去世了。你慢慢理解，有些陪伴会用另一种方式留在生活里。`,'bad');}
@@ -146,7 +149,7 @@
     snapshot(l);return true;
   }
   function snapshot(l){l.snaps[l.age]={age:l.age,health:Math.round(l.stats.health),happy:Math.round(l.stats.happy),know:Math.round(l.stats.know),social:Math.round(l.stats.social),savings:l.savings,pref:l.pref};}
-  function statusLabel(l){if(!l.alive)return `${l.deathAge} 岁 · ${l.deathCause}`;if(l.retired)return '退休生活';if(l.job)return l.job.title;if(l.age<3)return '在家人的照顾下长大';if(l.edu.stage==='elem')return `小学 ${Math.min(6,l.age-5)} 年级`;if(l.edu.stage==='jhs')return l.age<15?`初中 ${l.age-11} 年级`:'中考后的路口';return l.edu.label||'寻找下一步';}
+  function statusLabel(l){if(!l.alive)return l.playback?'回望这一年':`${l.deathAge} 岁 · ${l.deathCause}`;if(l.retired)return '退休生活';if(l.job)return l.job.title;if(l.employment?.search)return '寻找新的工作';if(l.age<3)return '在家人的照顾下长大';if(l.edu.stage==='elem')return `小学 ${Math.min(6,l.age-5)} 年级`;if(l.edu.stage==='jhs')return l.age<15?`初中 ${l.age-11} 年级`:'中考后的路口';return l.edu.label||'寻找下一步';}
   function runAuto(l,maxAge=120){for(let n=0;l.alive&&l.age<maxAge&&n<1000;n++){let ds=pendingDecisions(l);if(ds.length){for(const d of ds)resolve(l,d,autoChoice(l,d));}else step(l);}return l;}
   function serialize(l){return JSON.parse(JSON.stringify(l,(k,v)=>k==='r'?undefined:v));}
   function hydrate(x){
@@ -170,6 +173,10 @@
     if(!Number.isInteger(x.born.m)||x.born.m<1||x.born.m>12||!Number.isInteger(x.born.d)||x.born.d<1||x.born.d>31||!finite(x.fam.parentHH,0,1e11)||!finite(x.peak.income,0,1e11)||!finite(x.peak.savings,0,1e12)||!Array.isArray(x.jobHist)||x.jobHist.length>300)fail();
     if(x.jobHist.some(j=>!j||typeof j.title!=='string'||!finite(j.income,0,1e11)||!Number.isInteger(j.age)||j.age<0||j.age>x.age)||x.hobbies.some(h=>typeof h!=='string'||h.length>100)||x.fam.siblings.some(p=>!p||typeof p.name!=='string'||!finite(p.age,0,30)))fail();
     if(x.job&&(typeof x.job.title!=='string'||typeof x.job.kind!=='string'))fail();
+    if(x.job?.salaryHistory&&(!Array.isArray(x.job.salaryHistory)||x.job.salaryHistory.length>12||x.job.salaryHistory.some(n=>!finite(n,0,1e10))))fail();
+    if(x.employment){const e=x.employment;if(!Array.isArray(e.history)||e.history.length>500)fail();if(e.search&&(!finite(e.search.since,0,x.age)||!finite(e.search.previousIncome,0,1e10)||typeof e.search.kind!=='string'))fail();if(e.pending&&(!finite(e.pending.age,0,x.age)||!finite(e.pending.monthly,0,1e10)||!finite(e.pending.due,0,1e12)||!finite(e.pending.years,1,115)||typeof e.pending.withheld!=='boolean'))fail();}
+    if(x.playback&&(!Number.isInteger(x.playback.start)||!Number.isInteger(x.playback.end)||x.playback.start<0||x.playback.end<x.playback.start||x.playback.end>x.log.length||x.playback.age!==x.age||!finite(x.playback.progress,0,1)))fail();
+    if(x.flags.furtherStudy&&(!finite(x.flags.furtherStudy.startAge,18,115)||!finite(x.flags.furtherStudy.finishAge,x.flags.furtherStudy.startAge+1,118)||!['大专','本科','硕士'].includes(x.flags.furtherStudy.target)))fail();
     if([x.partner,x.spouse].some(p=>p&&(typeof p.name!=='string'||p.name.length>40)))fail();
     if(x.actions&&(!Array.isArray(x.actions)||x.actions.length>116||x.actions.some(a=>!a||typeof a.id!=='string'||!Number.isInteger(a.age)||a.age<0||a.age>x.age)))fail();
     if(x.origin&&(typeof x.origin.settlement!=='string'||typeof x.origin.family!=='string'))fail();
@@ -182,7 +189,7 @@
     x.version=D.version;G.CNLocal.normalize(x);return attachR(x);
   }
   function act(l,id){const ok=G.CNLocal.act(l,id,log);if(ok){clampStats(l);snapshot(l);}return ok;}
-  function transact(l,action,args){const result=G.CNAssets.transact(l,action,args,log);if(result.ok){clampStats(l);snapshot(l);}return result;}
+  function transact(l,action,args){const result=['study','moveCity'].includes(action)?G.CNLocal.spend(l,action,args,log):G.CNAssets.transact(l,action,args,log);if(result.ok){clampStats(l);snapshot(l);}return result;}
   function peers(l,maxAge=120){return Array.from({length:5},(_,i)=>{const date=`${l.born.y}-${String(l.born.m).padStart(2,'0')}-${String(l.born.d).padStart(2,'0')}T12:00:00+08:00`;return runAuto(createLife({seed:(l.seed+Math.imul(i+1,2654435761))>>>0,date}),maxAge);});}
   G.CNEngine={transact,assetOptions:G.CNAssets.options,assetTotals:G.CNAssets.totals,privateOptions:G.CNQueer.options,requestPrivate:G.CNQueer.request,createLife,step,pendingDecisions,resolve,autoChoice,runAuto,serialize,hydrate,statusLabel,money,nameOf,province,place,qx,act,peers,actionOptions:G.CNLocal.actionOptions,achievements:G.CNLocal.achievements,cityProfile:G.CNLocal.cityProfile,supportedVersions:['cn-0.1.0','cn-0.2.0',D.version],version:D.version};
 })(typeof window !== 'undefined' ? window : globalThis);

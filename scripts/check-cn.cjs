@@ -4,6 +4,7 @@ require('../engine.js');
 require('../cn-data.js');
 require('../cn-assets.js');
 require('../cn-queer.js');
+require('../cn-career.js');
 require('../cn-local.js');
 require('../cn-engine.js');
 const E = global.CNEngine;

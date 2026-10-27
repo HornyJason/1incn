@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-for(const f of ['data','engine','cn-data','cn-assets','cn-queer','cn-local','cn-engine','cn-interactions'])require('../'+f+'.js');
+for(const f of ['data','engine','cn-data','cn-assets','cn-queer','cn-career','cn-local','cn-engine','cn-interactions'])require('../'+f+'.js');
 const E=CNEngine,make=seed=>E.createLife({seed,date:'2026-10-27T12:00:00+08:00'});
 for(const [age,id] of [[12,'schoolLetter'],[19,'homeLetter']]){
   const l=make(13);l.age=age;l.year=l.born.y+age;

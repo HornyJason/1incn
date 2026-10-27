@@ -7,11 +7,21 @@
     const f=l.finances,p=E.cityProfile(l);
     if(!f)return '<h3>把日子算清楚</h3><p class="small muted">推进一年后，这里会生成新的年度账本。旧版存档的历史收支仍保留在原记录中。</p>';
     if(l.age<18)return `<h3>家人撑起的日常</h3><p>你还在成长，日常开支由家庭承担。</p><dl class="famlist"><dt>家庭年收入模型</dt><dd>${m(l.fam.parentHH)}</dd><dt>出生环境</dt><dd>${esc(l.origin.settlement)}</dd><dt>家庭底色</dt><dd>${esc(l.origin.family)}</dd></dl><p class="small muted">家庭收入和分组是游戏中的抽样结果。</p>`;
-    const row=(title,value)=>`<div><span>${title}</span><b>${m(value)}</b></div>`;
+    const row=(title,value)=>`<div><span>${title}</span><b>${m(value)}</b></div>${title==='你的到账估算'&&f.severance?`<div><span>离职赔偿到账</span><b>${m(f.severance)}</b></div>`:''}`;
     return `<h3>${f.year} 年，家里的小账本</h3><p class="small muted">${esc(l.city)} · ${esc(p.tier)} · 推进年份后更新</p><div class="cn-budget income">${row('你的到账估算',f.pay)}${f.spousePay?row('伴侣共同生活投入',f.spousePay):''}${f.support?row('家庭求学支持',f.support):''}${f.loanFunding?row('教育借款到账',f.loanFunding):''}${f.rentalIncome?row('出租房租金到账',f.rentalIncome):''}${f.assetIn?row('出售资产净到账',f.assetIn):''}</div><div class="cn-budget">${row('吃饭、交通和日常',f.daily)}${f.rent?row('住宿 / 租金',f.rent):''}${f.children?row('孩子的生活与学习',f.children):''}${f.care?row('父母照护',f.care):''}${f.tuition?row('学费',f.tuition):''}${f.mortgagePay?row('住房还款',f.mortgagePay):''}${f.studentPay?row('偿还教育借款',f.studentPay):''}${f.propertyCost?row('房产维护',f.propertyCost):''}${f.carCost?row('车辆使用与维护',f.carCost):''}${f.assetOut?row('购置资产及手续费',f.assetOut):''}${f.other?row('其他支出及选择',f.other):''}</div><div class="cn-budget total">${row(f.balance>=0?'本年结余':'本年收支缺口',Math.abs(f.balance))}${row('当前未还借款',l.debt)}${row('资产净值（含房车）',E.assetTotals(l).netWorth)}</div>${f.valueChange?`<p class="small muted">本年房产估值变动：${f.valueChange>0?'+':''}${m(f.valueChange)}（未出售，不计入现金）</p>`:''}<p class="small muted">这里是游戏账本。薪酬扣除、家庭投入、城市价格和借款为简化模型，不对应真实税制、社保或贷款报价。</p>`;
   }
 
-  function assets(l){
+  function spending(l){
+    const button=(label,action,args,hint,disabled)=>`<button class="ghost small" data-asset="${action}" data-args="${esc(JSON.stringify(args))}" data-confirm="${esc(hint)}" ${disabled?'disabled':''}>${esc(label)}</button>`;
+    const used=l.flags.studyYear===l.age,ongoing=l.flags.furtherStudy;
+    const courses=`<h4>读书与深造</h4><div class="mopts">${button(l.age<18?'读书与兴趣课程 · 家庭支持':'读书与兴趣课程 · 300 元','study',{id:'reading'},l.age<18?'由家人支持课程，知识 +1。':'花费 300 元报名，知识 +1。',!l.alive||used||l.age>=18&&l.savings<300)}${l.age>=18?button('职业技能课程 · 4,000 元','study',{id:'skill'},'支付 4,000 元报名技能课程，知识 +3。',!l.alive||used||l.savings<4000)+button(ongoing?`继续教育进行中 · ${ongoing.finishAge} 岁结业`:'继续教育深造 · 20,000 元','study',{id:'degree'},'一次支付 20,000 元，三年持续学习并提升游戏中的学历；不是立即毕业。',!l.alive||used||!!ongoing||['硕士','博士'].includes(l.eduDone)||l.retired||l.savings<20000||['univ','college','grad'].includes(l.edu.stage)&&!l.job):''}</div><p class="small muted">每年可安排一次课程；成年前课程由家人支持。学历、年限与费用为游戏设定。</p>`;
+    if(l.age<18)return courses+'<p class="small muted">买房、买车和独立迁居会在成年后开放。</p>';
+    const destinations=D.provinces.map(p=>({pref:p.name,city:p.cities[0]}));
+    const cities=destinations.map(p=>{const profile=E.cityProfile({...l,...p,rural:false}),cost=Math.round(1800+profile.rent*2);return button(`${p.city} · ${E.money(cost)}`,'moveCity',p,`搬到${p.pref}${p.city}，支付 ${E.money(cost)} 搬迁与安置费。原自住房将空置；原工作结束，需要在当地重新求职。`,!l.alive||l.savings<cost||l.flags.moveYear===l.age||l.pref===p.pref&&l.city===p.city);});
+    return courses+`<details class="cn-move"><summary>换一座城市生活</summary><p class="small muted">搬迁费包含安置支出；新城市的工资机会与生活成本也会变化。已有工作需重新寻找。</p><div class="cn-asset-actions">${cities.join('')}</div></details>`;
+  }
+  function assets(l){return spending(l)+(l.age>=18?assetInventory(l):'');}
+  function assetInventory(l){
     const totals=E.assetTotals(l),offers=E.assetOptions(l),adult=l.alive&&l.age>=18;
     const button=(label,action,args,confirm,disabled=false)=>`<button class="ghost small" data-asset="${action}" data-args="${esc(JSON.stringify(args))}" data-confirm="${esc(confirm)}" ${!adult||disabled?'disabled':''}>${esc(label)}</button>`;
     const uses={self:'自住',rent:'出租',vacant:'空置'};
